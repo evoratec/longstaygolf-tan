@@ -1,6 +1,6 @@
 {
   "name": "cadence-web",
-  "private": true,
+  "description": "Website and documentation for Cadence.",
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",

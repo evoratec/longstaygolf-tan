@@ -330,9 +330,10 @@ function DownloadsPage() {
 									Run Cadence in a Docker container.
 								</p>
 								<code className="text-xs bg-black/30 text-emerald-300 p-2 rounded block">
-									docker pull
+									{/**docker pull
 									<br />
-									trycadence/cadence
+									trycadence/cadence*/}
+         COMING SOON!
 								</code>
 							</div>
 

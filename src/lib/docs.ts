@@ -52,29 +52,75 @@ interface DocMeta {
 /**
  * Parse markdown content, extracting frontmatter and returning the rendered
  * markdown body along with title and description metadata.
+ *
+ * Frontmatter is expected to be YAML-like format between two lines of `---`:
+ *   ---
+ *   title: Some Title
+ *   description: Some description
+ *   ---
+ *
+ * This function strips the frontmatter and returns only the markdown body.
+ * If the markdown starts with an H1 matching the extracted title, it's removed
+ * to avoid duplication (since the title is rendered by the layout).
  */
 export function parseMarkdown(content: string) {
 	const normalized = content.replace(/\r\n/g, "\n");
-	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
-	const match = normalized.match(frontmatterRegex);
 
-	if (match) {
-		const frontmatter = match[1];
-		const markdown = match[2];
-		const title =
-			frontmatter.match(/title:\s*(.+)/)?.[1]?.trim() ||
-			extractHeading(markdown) ||
-			"Documentation";
-		const description =
-			frontmatter.match(/description:\s*(.+)/)?.[1]?.trim() ||
-			extractDescription(markdown) ||
-			"";
-		return { markdown, title, description };
+	// Simple frontmatter extraction: look for --- at start and somewhere else
+	let markdown = "";
+	let title = "";
+	let description = "";
+
+	// Check if file starts with frontmatter
+	if (normalized.startsWith("---")) {
+		// Find the closing --- (must be on its own line)
+		const closingIndex = normalized.indexOf("\n---\n", 4); // Start search after opening ---\n
+
+		if (closingIndex !== -1) {
+			// Found closing ---, extract frontmatter
+			const frontmatterBlock = normalized.substring(4, closingIndex); // Skip "---\n"
+			markdown = normalized.substring(closingIndex + 5).trim(); // Skip "\n---\n"
+
+			// Parse frontmatter lines
+			for (const line of frontmatterBlock.split("\n")) {
+				const match = line.match(/^title:\s*(.+)$/);
+				if (match) {
+					title = match[1].trim();
+				}
+				const descMatch = line.match(/^description:\s*(.+)$/);
+				if (descMatch) {
+					description = descMatch[1].trim();
+				}
+			}
+		} else {
+			// No closing ---, treat entire file as markdown
+			markdown = normalized;
+			title = extractHeading(markdown) || "Documentation";
+		}
+	} else {
+		// No frontmatter
+		markdown = normalized;
+		title = extractHeading(markdown) || "Documentation";
 	}
 
-	const title = extractHeading(normalized) || "Documentation";
-	const description = extractDescription(normalized) || "";
-	return { markdown: content, title, description };
+	// Fallback title/description extraction if not in frontmatter
+	if (!title) {
+		title = extractHeading(markdown) || "Documentation";
+	}
+	if (!description) {
+		description = extractDescription(markdown) || "";
+	}
+
+	// Remove duplicate H1 if markdown starts with it and it matches the title
+	const firstHeading = extractHeading(markdown);
+	if (
+		firstHeading &&
+		firstHeading.toLowerCase() === title.toLowerCase()
+	) {
+		markdown = markdown.replace(/^#+\s+.+\n+/, "");
+	}
+
+	return { markdown, title, description };
 }
 
 function extractHeading(content: string): string | null {

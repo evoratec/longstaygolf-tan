@@ -43,6 +43,12 @@ export function Header() {
 							Playground
 						</a>
 						<a
+							href="/downloads"
+							className="text-sm text-white/50 hover:text-white transition-colors"
+						>
+							Downloads
+						</a>
+						<a
 							href="/changelog"
 							className="text-sm text-white/50 hover:text-white transition-colors"
 						>
@@ -121,6 +127,20 @@ export function Header() {
 							onClick={() => setMobileMenuOpen(false)}
 						>
 							Examples
+						</a>
+						<a
+							href="/analysis"
+							className="px-3 py-2 text-sm text-white/50 hover:text-white rounded transition-colors"
+							onClick={() => setMobileMenuOpen(false)}
+						>
+							Playground
+						</a>
+						<a
+							href="/downloads"
+							className="px-3 py-2 text-sm text-white/50 hover:text-white rounded transition-colors"
+							onClick={() => setMobileMenuOpen(false)}
+						>
+							Downloads
 						</a>
 						<a
 							href="/changelog"

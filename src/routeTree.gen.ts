@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MetaPreviewRouteImport } from './routes/meta-preview'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ExamplesRouteImport } from './routes/examples'
+import { Route as DownloadsRouteImport } from './routes/downloads'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,6 +32,11 @@ const FeaturesRoute = FeaturesRouteImport.update({
 const ExamplesRoute = ExamplesRouteImport.update({
   id: '/examples',
   path: '/examples',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadsRoute = DownloadsRouteImport.update({
+  id: '/downloads',
+  path: '/downloads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangelogRoute = ChangelogRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/changelog': typeof ChangelogRoute
+  '/downloads': typeof DownloadsRoute
   '/examples': typeof ExamplesRoute
   '/features': typeof FeaturesRoute
   '/meta-preview': typeof MetaPreviewRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/changelog': typeof ChangelogRoute
+  '/downloads': typeof DownloadsRoute
   '/examples': typeof ExamplesRoute
   '/features': typeof FeaturesRoute
   '/meta-preview': typeof MetaPreviewRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/changelog': typeof ChangelogRoute
+  '/downloads': typeof DownloadsRoute
   '/examples': typeof ExamplesRoute
   '/features': typeof FeaturesRoute
   '/meta-preview': typeof MetaPreviewRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/changelog'
+    | '/downloads'
     | '/examples'
     | '/features'
     | '/meta-preview'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/changelog'
+    | '/downloads'
     | '/examples'
     | '/features'
     | '/meta-preview'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/changelog'
+    | '/downloads'
     | '/examples'
     | '/features'
     | '/meta-preview'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
   ChangelogRoute: typeof ChangelogRoute
+  DownloadsRoute: typeof DownloadsRoute
   ExamplesRoute: typeof ExamplesRoute
   FeaturesRoute: typeof FeaturesRoute
   MetaPreviewRoute: typeof MetaPreviewRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/examples'
       fullPath: '/examples'
       preLoaderRoute: typeof ExamplesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/downloads': {
+      id: '/downloads'
+      path: '/downloads'
+      fullPath: '/downloads'
+      preLoaderRoute: typeof DownloadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/changelog': {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
   ChangelogRoute: ChangelogRoute,
+  DownloadsRoute: DownloadsRoute,
   ExamplesRoute: ExamplesRoute,
   FeaturesRoute: FeaturesRoute,
   MetaPreviewRoute: MetaPreviewRoute,

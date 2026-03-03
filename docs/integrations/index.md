@@ -1,10 +1,10 @@
 ﻿---
 title: Integrations
 description: Connect Cadence to Git platforms, AI providers, AI assistants, and automation workflows
-order: 0
+order: 3
 ---
 
-# Integrations
+## Integrations
 
 Cadence provides four integration surfaces: a **webhook server** for continuous Git platform monitoring, **AI providers** (OpenAI and Anthropic) for enhanced detection, an **AI skills system** for embedding detection into agents and pipelines, and a **plugin API** for extending detection with custom strategies.
 

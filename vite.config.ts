@@ -18,6 +18,7 @@ const config = defineConfig(({ mode }) => ({
 			? [
 					cloudflare({
 						configPath: "./wrangler.jsonc",
+						viteEnvironment: { name: "ssr" },
 					}),
 				]
 			: []),

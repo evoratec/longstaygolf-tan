@@ -1,4 +1,5 @@
-import { AlertTriangle, ChevronRight, Github, Terminal } from "lucide-react";
+import { AlertTriangle, ChevronRight, Terminal } from "lucide-react";
+import { SiGithub } from "react-icons/si";
 import { useVersion } from "../../lib/useVersion";
 import { Button } from "../ui/Button";
 
@@ -18,7 +19,7 @@ export function Hero() {
 					<Terminal className="w-4 h-4" />
 					<span className="font-mono">{version}</span>
 					<span className="w-px h-3 bg-white/20" />
-					<span>26 Detection Strategies</span>
+					<span>38 Detection Strategies</span>
 					<ChevronRight className="w-3 h-3 text-white/30 group-hover:text-white/60 transition-colors" />
 				</a>
 
@@ -57,7 +58,7 @@ export function Hero() {
 							rel="noopener noreferrer"
 							className="group"
 						>
-							<Github className="w-5 h-5" />
+							<SiGithub className="w-5 h-5" />
 							View on GitHub
 							<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
 						</a>

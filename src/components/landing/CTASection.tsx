@@ -1,4 +1,5 @@
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { SiGithub } from "react-icons/si";
 import { Button } from "../ui/Button";
 
 export function CTASection() {
@@ -22,7 +23,7 @@ export function CTASection() {
 								rel="noopener noreferrer"
 								className="group"
 							>
-								<Github className="w-5 h-5" />
+								<SiGithub className="w-5 h-5" />
 								View Repository
 								<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
 							</a>

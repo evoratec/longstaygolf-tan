@@ -39,7 +39,7 @@ bun install
 # Start development server
 bun run dev
 
-# Open browser at http://localhost:3000
+# Open browser at http://localhost:3001
 ```
 
 ### Development Scripts

@@ -35,20 +35,22 @@ cadence analyze . -o report.json
 # Analyze local repo
 cadence analyze /path/to/repo -o report.json
 
-# Analyze GitHub repo
+# Analyze GitHub repo (clones automatically)
 cadence analyze https://github.com/owner/repo -o report.json
 
 # Analyze specific branch
-cadence analyze https://github.com/owner/repo/tree/main -o report.json
+cadence analyze https://github.com/owner/repo --branch main -o report.json
 
-# With custom thresholds
+# With custom thresholds (flags override config)
 cadence analyze /repo --suspicious-additions 1000 -o report.json
+cadence analyze /repo --max-additions-pm 150 -o report.json
+cadence analyze /repo --min-time-delta 30 -o report.json
 
 # Exclude files
 cadence analyze /repo --exclude-files "*.lock,*.log" -o report.json
 
 # With config file
-cadence analyze /repo --config cadence.yaml -o report.json
+cadence analyze /repo --config .cadence.yaml -o report.json
 ```
 
 ### Website Analysis
@@ -70,31 +72,31 @@ cadence web https://example.com -o report.txt
 ### Configuration
 
 ```bash
-# Show default config
+# Print default config to stdout
 cadence config
 
-# Create config file
+# Create config file in current directory
 cadence config init
 # Creates .cadence.yaml
 
-# Use config file
-cadence analyze /repo --config cadence.yaml -o report.json
+# Use config file (always pass explicitly — auto-detection uses cadence.yml)
+cadence analyze /repo --config .cadence.yaml -o report.json
 ```
 
 ### Webhook Server
 
 ```bash
-# Start on default port (3000)
+# Start on default port (8000)
 cadence webhook --secret "webhook-secret"
 
-# Custom port
-cadence webhook --port 8080 --secret "webhook-secret"
+# Custom port and host
+cadence webhook --port 8080 --host 0.0.0.0 --secret "webhook-secret"
 
 # With config file
-cadence webhook --config cadence.yaml
+cadence webhook --config .cadence.yaml
 
-# Custom workers
-cadence webhook --port 8080 --workers 8 --secret "secret"
+# Custom workers and timeouts
+cadence webhook --port 8080 --workers 8 --read-timeout 60 --write-timeout 60 --secret "secret"
 ```
 
 ### Version
@@ -114,6 +116,7 @@ thresholds:
   max_additions_per_min: 50
   max_files_per_commit: 20
   max_addition_ratio: 0.80
+  enable_precision_analysis: true
 ```
 
 ### Balanced (Default)
@@ -125,6 +128,9 @@ thresholds:
   max_additions_per_min: 100
   max_files_per_commit: 50
   max_addition_ratio: 0.95
+  min_deletion_ratio: 0.95
+  min_commit_size_ratio: 100
+  enable_precision_analysis: true
 ```
 
 ### Permissive (Lenient)
@@ -168,20 +174,23 @@ cadence web https://example.com -o report.txt   # Text
 ## Environment Variables
 
 ```bash
-OPENAI_API_KEY=sk-...                 # OpenAI API key
-CADENCE_CONFIG=/path/to/cadence.yaml  # Config file location
-CADENCE_WEBHOOK_PORT=8080             # Webhook port
-CADENCE_WEBHOOK_SECRET=secret         # Webhook secret
+CADENCE_AI_ENABLED=true               # Enable AI analysis
+CADENCE_AI_KEY=sk-...                 # AI provider API key
+CADENCE_AI_PROVIDER=openai            # "openai" or "anthropic"
+CADENCE_AI_MODEL=gpt-4o-mini          # Model override (optional)
+CADENCE_WEBHOOK_PORT=8080             # Webhook listen port
+CADENCE_WEBHOOK_SECRET=secret         # Webhook HMAC secret
 ```
 
 ## Make Commands (Build from Source)
 
 ```bash
-make build    # Build with version injection
+make build    # Build with version injection (output: ./bin/cadence)
 make install  # Install to $GOPATH/bin
 make test     # Run all tests
 make fmt      # Format code
-make lint     # Run linter
+make lint     # Run linter (golangci-lint)
+make tidy     # Run go mod tidy
 make clean    # Clean artifacts
 make help     # Show all targets
 ```
@@ -192,7 +201,7 @@ make help     # Show all targets
 
 ```bash
 for repo in ~/projects/*; do
-  cadence analyze "$repo" -o "reports/$(basename $repo).json"
+  cadence analyze "$repo" --config .cadence.yaml -o "reports/$(basename $repo).json"
 done
 ```
 
@@ -200,14 +209,14 @@ done
 
 ```bash
 cadence web https://example.com --verbose -o report.json
-cat reports/report.json | grep "suspicious"
+cat reports/report.json | grep -i suspicious
 ```
 
 ### CI/CD Integration
 
 ```bash
-cadence analyze . --config cadence.yaml -o report.json
-if grep -q '"score": 0\.[89]' report.json; then
+cadence analyze . --config .cadence.yaml -o report.json
+if grep -q '"score": 0\.[89]' reports/report.json; then
   echo "Suspicious commits detected"
   exit 1
 fi
@@ -216,9 +225,9 @@ fi
 ### Compare Branches
 
 ```bash
-cadence analyze https://github.com/owner/repo/tree/feature -o feature.json
-cadence analyze https://github.com/owner/repo/tree/main -o main.json
-diff feature.json main.json
+cadence analyze https://github.com/owner/repo --branch feature -o feature.json
+cadence analyze https://github.com/owner/repo --branch main -o main.json
+diff reports/feature.json reports/main.json
 ```
 
 ## Getting Help
@@ -245,14 +254,15 @@ Build script (Windows):     .\scripts\build.ps1
 
 | Item | Location |
 |------|----------|
-| Binary after build | `./bin/cadence` (macOS/Linux) or `./cadence.exe` (Windows) |
-| Config file | `.cadence.yaml` (current directory) or specify with `--config` |
-| Reports | `./reports/` (auto-created) |
-| System PATH | `/usr/local/bin/cadence` (after adding to PATH) |
+| Binary after `make build` | `./bin/cadence` (macOS/Linux) or `.\cadence.exe` (Windows) |
+| Config file (after `config init`) | `.cadence.yaml` (current directory) |
+| Reports directory | `./reports/` (auto-created) |
+| System PATH install | `/usr/local/bin/cadence` |
 
 ## Next Steps
 
 - [Quick Start](/docs/getting-started/quick-start) - Step-by-step guide (5 min)
+- [Understanding Results](/docs/getting-started/understanding-results) - How to read scores, assessments, and detections
 - [Installation](/docs/getting-started/installation) - Full installation guide
 - [Configuration](/docs/getting-started/configuration) - Custom thresholds
 - [CLI Commands](/docs/cli/commands) - Complete command reference

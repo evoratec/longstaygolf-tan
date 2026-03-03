@@ -4,7 +4,7 @@ Repository analysis evaluates the overall quality and authenticity of a Git repo
 
 ## Detection Approach
 
-Cadence doesn't look for a single "smoking gun" - instead, it applies **13+ independent detection strategies** that each score commits on a 0-100 scale. A commit is flagged as suspicious when multiple strategies report high scores, indicating a pattern of suspicious behavior rather than a single anomalous value.
+Cadence doesn't look for a single "smoking gun" — instead, it applies **18 independent detection strategies** that each score commits on a 0–100 scale. A commit is flagged as suspicious when multiple strategies report high scores, indicating a pattern of suspicious behavior rather than a single anomalous value.
 
 ## Core Strategies
 
@@ -70,7 +70,7 @@ Each strategy produces a suspicion score from 0-100:
 - **31-70**: Moderately suspicious
 - **71-100**: Highly suspicious
 
-A single high score on one strategy isn't conclusive - instead, Cadence looks for **consensus across multiple strategies**. A commit flagged by 5+ strategies is much more likely to be suspicious than one flagged by just one.
+A single high score on one strategy isn't conclusive — instead, Cadence looks for **consensus across multiple strategies**. A commit flagged by 5+ strategies is much more likely to be suspicious than one flagged by just one.
 
 ## Integration with Git Analysis
 
@@ -81,13 +81,15 @@ Repository analysis provides high-level insights and summary statistics. For dee
 Repository analysis is typically the entry point. Run it with:
 
 ```bash
-cadence analyze /path/to/repo
+cadence analyze /path/to/repo -o report.json
 ```
 
-This produces a JSON report showing:
+This produces a report showing:
 - Summary statistics for the repository
 - Flagged commits with suspicion scores
 - Strategy breakdown for each flagged commit
+- Timing information with phase durations
+- Source metrics and severity counts
 - Recommendations
 
-For detailed examples, see [Analysis Examples](/docs/analysis/examples).
+Supported output formats: JSON, text, HTML, YAML, BSON.

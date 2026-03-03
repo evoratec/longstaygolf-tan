@@ -1,6 +1,6 @@
 # Web Content Analysis
 
-Cadence can analyze website content to detect AI-generated text and low-quality content ("slop"). This works by fetching web pages and analyzing the text for patterns commonly found in AI-generated writing.
+Cadence can analyze website content to detect AI-generated text and low-quality content ("slop"). This works by fetching web pages and analyzing the text using 20 detection strategies for patterns commonly found in AI-generated writing.
 
 ## How It Works
 
@@ -80,7 +80,17 @@ Shows detailed analysis results including word count, heading analysis, and patt
 
 ## Output
 
-Web analysis produces results showing:
+Web analysis produces results in any of Cadence's five output formats (JSON, text, BSON, YAML, HTML):
+
+```bash
+cadence web https://example.com -o report.json    # JSON
+cadence web https://example.com -o report.txt     # Text
+cadence web https://example.com -o report.yaml    # YAML
+cadence web https://example.com -o report.html    # HTML
+cadence web https://example.com -o report.bson    # BSON
+```
+
+Results include:
 
 - **Content Score** - Overall assessment of content quality
 - **Pattern Matches** - Which detection patterns were triggered

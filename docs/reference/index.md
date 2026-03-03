@@ -4,13 +4,19 @@ Advanced reference documentation for users, developers, and system administrator
 
 ## Documentation Sections
 
-### [Advanced Configuration](/docs/reference/advanced-configuration)
-Complete configuration reference with all available options for detection thresholds, webhook server tuning, AI validation, and file exclusion patterns.
+### [API Reference](/docs/reference/api)
+REST API endpoints, webhook payloads, job management, SSE streaming, and error response formats.
+
+### [Architecture](/docs/reference/architecture)
+System design, component overview, data flow diagrams, and internal architecture documentation.
 
 ### [Build & Development](/docs/reference/build-development)
-Developer guide for building from source, development workflow, running tests, and contributing to Cadence.
+Developer guide for building from source, cross-platform builds, version management, and contributing to Cadence.
 
-### [Troubleshooting](/docs/reference/troubleshooting)
+### [Operations](/docs/reference/operations)
+Production deployment, hosting, and infrastructure management. Includes deployment methods, networking, monitoring, security, and performance tuning.
+
+### [Troubleshooting](/docs/reference/operations/troubleshooting)
 Solutions for common issues including installation problems, analysis errors, network issues, and performance optimization.
 
 ### [Disclaimer](/docs/reference/disclaimer)
@@ -63,15 +69,21 @@ exclude_files:
 webhook:
   enabled: false
   host: "0.0.0.0"
-  port: 3000
+  port: 8000
   secret: "your-secret"
   max_workers: 4
 
 # Optional: AI analysis
 ai:
   enabled: false
-  provider: "openai"
-  model: "gpt-4o-mini"
+  provider: "openai"            # or "anthropic"
+  model: ""                     # Leave empty for provider default
+
+# Optional: Strategy configuration
+strategies:
+  # Enable/disable specific strategies
+  # disabled_strategies:
+  #   - "strategy_name"
 ```
 
 ## Configuration Loading
@@ -102,9 +114,9 @@ export CADENCE_WEBHOOK_MAX_WORKERS=4
 
 # AI settings
 export CADENCE_AI_ENABLED=true
-export CADENCE_AI_PROVIDER=openai
-export CADENCE_AI_API_KEY="sk-..."
-export CADENCE_AI_MODEL=gpt-4o-mini
+export CADENCE_AI_PROVIDER=openai    # or "anthropic"
+export CADENCE_AI_KEY="sk-..."
+export CADENCE_AI_MODEL=gpt-4o-mini  # or leave empty for default
 
 # Exclude files
 export CADENCE_EXCLUDE_FILES="*.lock,node_modules/*"
@@ -114,7 +126,7 @@ export CADENCE_EXCLUDE_FILES="*.lock,node_modules/*"
 
 Version information is automatically injected during build:
 
-- **Version** - From Git tags (e.g., `v2.1.0`)
+- **Version** - From Git tags (e.g., `v0.3.0`)
 - **Commit** - Short Git commit hash
 - **Build Time** - UTC timestamp
 
@@ -128,5 +140,6 @@ cadence version
 
 - [Advanced Configuration](/docs/reference/advanced-configuration) - All configuration options
 - [Build & Development](/docs/reference/build-development) - Building and development
+- [Operations](/docs/reference/operations) - Deployment and infrastructure
 - [Troubleshooting](/docs/reference/troubleshooting) - Common issues and solutions
 - [Disclaimer](/docs/reference/disclaimer) - Limitations and ethical use

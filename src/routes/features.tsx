@@ -8,16 +8,15 @@ import {
 	Code2,
 	FileSearch,
 	GitBranch,
-	GithubIcon,
 	Globe,
 	Layers,
 	Settings,
 	Shield,
 	Terminal,
-	Twitter,
 	Webhook,
 	Zap,
 } from "lucide-react";
+import { SiGithub, SiX } from "react-icons/si";
 import { useState } from "react";
 import { LogoIcon } from "../components/Logo";
 import { Footer } from "../components/landing/Footer";
@@ -194,7 +193,7 @@ function DetectionStrategiesSection() {
 						<GitBranch className="w-4 h-4" />
 						Git Repository
 						<span className="px-1.5 py-0.5 rounded bg-white/10 text-xs">
-							16
+							{gitStrategies.length}
 						</span>
 					</button>
 					<button
@@ -209,7 +208,7 @@ function DetectionStrategiesSection() {
 						<Globe className="w-4 h-4" />
 						Web Content
 						<span className="px-1.5 py-0.5 rounded bg-white/10 text-xs">
-							10
+							{webStrategies.length}
 						</span>
 					</button>
 				</div>
@@ -280,6 +279,12 @@ function FeaturesPage() {
 						</Link>
 						<nav className="flex items-center gap-4">
 							<Link
+								to="/analysis"
+								className="text-sm text-white/50 hover:text-white transition-colors"
+							>
+								Playground
+							</Link>
+							<Link
 								to="/docs"
 								className="text-sm text-white/50 hover:text-white transition-colors"
 							>
@@ -291,7 +296,7 @@ function FeaturesPage() {
 								rel="noopener noreferrer"
 								className="text-sm text-white/50 hover:text-white transition-colors"
 							>
-								<Twitter className="w-4 h-4" />
+								<SiX className="w-3.5 h-3.5" />
 							</a>
 							<a
 								href="https://github.com/TryCadence/Cadence"
@@ -299,7 +304,7 @@ function FeaturesPage() {
 								rel="noopener noreferrer"
 								className="text-sm text-white/50 hover:text-white transition-colors flex items-center gap-1"
 							>
-								<GithubIcon className="w-4 h-4" />
+								<SiGithub className="w-4 h-4" />
 							</a>
 						</nav>
 					</div>

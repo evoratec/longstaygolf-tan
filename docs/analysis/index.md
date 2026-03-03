@@ -15,7 +15,7 @@ See [Repository Analysis](/docs/analysis/repository) for detailed strategy infor
 
 ## Git Analysis
 
-Deep dive into Git commit history using 13+ detection strategies. Cadence examines commit patterns across time to identify statistical anomalies and behavioral indicators of AI-generated code.
+Deep dive into Git commit history using 18 detection strategies. Cadence examines commit patterns across time to identify statistical anomalies and behavioral indicators of AI-generated code.
 
 Detection strategies analyze:
 

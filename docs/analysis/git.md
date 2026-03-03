@@ -318,11 +318,9 @@ Provides detailed per-commit analysis.
 
 **Why it matters:** Provides granular detail for suspicious commits
 
-## Configuration File
+## Configuration
 
-Cadence uses a `cadence.yml` configuration file to customize detection thresholds and behavior. 
-
-**📖 For full configuration reference:** [Configuration Guide](/docs/configuration)
+Cadence uses a `.cadence.yaml` configuration file to customize detection thresholds and behavior.
 
 **Example:**
 ```yaml
@@ -333,67 +331,64 @@ thresholds:
 
 ai:
   enabled: false
-  provider: openai
+  provider: "openai"  # or "anthropic"
+
+strategies:
+  # Disable specific strategies if needed
+  # emoji_pattern_analysis: false
 ```
 
 Load with analysis:
 ```bash
-cadence analyze /repo --config cadence.yml --output report.json
+cadence analyze /repo --config cadence.yaml --output report.json
 ```
 
-**📖 See all options in:** [Configuration Reference](/docs/configuration) | [Advanced Configuration](/docs/advanced-configuration)
+See [Configuration](/docs/getting-started/configuration) and [Advanced Configuration](/docs/reference/advanced-configuration) for all options.
 
 ## Output Formats
 
-### JSON Report
+Cadence supports 5 output formats, detected from file extension:
 
 ```bash
-cadence analyze /repo --output report.json
+cadence analyze /repo -o report.json    # JSON (pretty-printed with timing and metrics)
+cadence analyze /repo -o report.txt     # Text (terminal-friendly with box-drawing)
+cadence analyze /repo -o report.html    # HTML (styled report with stat cards)
+cadence analyze /repo -o report.yaml    # YAML (snake-case keys, full structure)
+cadence analyze /repo -o report.bson    # BSON (binary encoding with base64 output)
 ```
 
-**Report structure:**
+### JSON Report Structure
+
 ```json
 {
-  "repository": {
-    "path": "/path/to/repo",
-    "branch": "main",
-    "commits_analyzed": 150
-  },
-  "summary": {
-    "total_commits": 150,
-    "suspicious_commits": 8,
-    "confidence_score": 0.75
-  },
-  "results": [
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "source_type": "git",
+  "source_id": "owner/repo",
+  "analyzed_at": "2026-02-12T10:30:00Z",
+  "duration": "2.5s",
+  "overall_score": 0.75,
+  "assessment": "Suspicious Activity Detected",
+  "total_detections": 8,
+  "detection_count": 5,
+  "detections": [
     {
-      "hash": "abc123...",
-      "author": "User <user@example.com>",
-      "timestamp": "2024-01-15T10:30:00Z",
-      "stats": {
-        "additions": 250,
-        "deletions": 50,
-        "files_changed": 5
-      },
-      "flags": [
-        {
-          "strategy": "velocity_analysis",
-          "severity": "high",
-          "message": "Addition velocity too high..."
-        }
-      ],
-      "confidence": 0.85
+      "strategy": "velocity_analysis",
+      "category": "velocity",
+      "severity": "high",
+      "confidence": 0.85,
+      "message": "Addition velocity too high...",
+      "metadata": {}
     }
-  ]
+  ],
+  "timing": {
+    "phases": [
+      {"name": "validate", "duration": "10ms"},
+      {"name": "fetch", "duration": "1.2s"},
+      {"name": "detect", "duration": "800ms"}
+    ]
+  }
 }
 ```
-
-### Text Report
-
-```bash
-cadence analyze /repo --output report.txt
-```
-
-Shows human-readable summary with commit details and flags.
 
 ## Advanced Usage
 
@@ -402,9 +397,7 @@ Shows human-readable summary with commit details and flags.
 ```bash
 cadence analyze /repo \
   --output report.json \
-  --exclude-files "*.lock" \
-  --exclude-files "dist/**" \
-  --exclude-files "node_modules/**"
+  --exclude-files "*.lock,dist/**,node_modules/**"
 ```
 
 ### Branch-Specific Analysis
@@ -417,28 +410,33 @@ cadence analyze /repo \
 
 ### AI Validation (Optional)
 
-Enable OpenAI analysis for expert verification:
+Enable AI analysis for expert verification:
 
 ```yaml
 ai:
   enabled: true
-  provider: openai
-  api_key: sk-...
-  model: gpt-4o-mini
+  provider: "openai"    # or "anthropic"
+  api_key: ""           # Or set CADENCE_AI_KEY env var
 ```
 
-The AI model reviews flagged commits and provides additional context.
+The AI provider reviews flagged commits and provides additional context with confidence scoring and reasoning.
 
 ## Understanding Results
 
 ### Confidence Scores
 
-Each commit receives a confidence score (0-1) indicating likelihood of AI generation:
+Each commit receives a confidence score (0.0–1.0) indicating likelihood of AI generation:
 
-- **0.0-0.3**: Likely human-written
-- **0.3-0.6**: Possibly human or AI-assisted
-- **0.6-0.8**: Likely AI-generated
-- **0.8-1.0**: Very likely AI-generated
+- **0.0–0.3**: Likely human-written
+- **0.3–0.6**: Possibly human or AI-assisted
+- **0.6–0.8**: Likely AI-generated
+- **0.8–1.0**: Very likely AI-generated
+
+### Overall Assessment
+
+The report's `OverallScore` uses confidence-weighted scoring:
+- Higher-confidence strategies contribute more to the score
+- Assessment thresholds: score ≥70 = "Suspicious Activity Detected", ≥40 = "Moderate Suspicion"
 
 ### Flag Severity Levels
 
@@ -447,105 +445,20 @@ Each commit receives a confidence score (0-1) indicating likelihood of AI genera
 - **High**: Strong indicator of AI generation
 - **Critical**: Multiple factors strongly suggest AI
 
-## Performance Considerations
-
-### Large Repositories
-
-For repositories with 1000+ commits:
-
-```bash
-# Analyze specific branch only
-cadence analyze /repo --branch main --output report.json
-
-# Exclude unnecessary file patterns
-cadence analyze /repo \
-  --exclude-files "dist/**" \
-  --exclude-files "*.min.js" \
-  --output report.json
-
-# Consider analysis time (typically 1-5 minutes for 1000 commits)
-```
-
-### Memory Usage
-
-- Small repo (0-100 commits): ~50MB
-- Medium repo (100-1000 commits): ~200MB
-- Large repo (1000+ commits): ~500MB+
-
-## Troubleshooting
-
-### Repository Clone Fails
-
-```bash
-# Check network connectivity
-curl -I https://github.com
-
-# Verify URL format
-# Valid: https://github.com/owner/repo
-# Valid: https://github.com/owner/repo/tree/branch
-# Invalid: git@github.com:owner/repo.git (SSH URLs not supported)
-```
-
-### Analysis Takes Too Long
-
-- Reduce repository size with `--branch` flag
-- Use exclude patterns for generated files
-- Consider analyzing recent commits only
-
-### Missing Commits
-
-- Verify branch name with `--branch` flag
-- Ensure no fetch depth limitations
-- Check file permissions on repository
-
-## Real-World Examples
-
-### Example 1: Reviewing Code for AI Assistance
-
-```bash
-cadence analyze ~/my-project \
-  --output review.json \
-  --suspicious-additions 300 \
-  --max-additions-pm 150
-```
-
-Check `review.json` for flagged commits to understand where AI may have assisted.
-
-### Example 2: Compliance Auditing
-
-```bash
-cadence analyze https://github.com/org/critical-repo \
-  --output compliance-report.json \
-  --config cadence.yml
-```
-
-Generate compliance report for organizational review.
-
-### Example 3: Continuous Monitoring
-
-```bash
-# Monitor for new suspicious commits
-cadence analyze /repo --branch main --output current.json
-# Compare with previous analysis to identify new suspicious commits
-```
-
 ## Best Practices
 
-1. **Use Configuration Files** - Ensures consistent thresholds across analyses
-2. **Review Flagged Commits** - Not all flags indicate AI generation
-3. **Consider Context** - Large commits may be legitimate (initial import, refactoring)
-4. **Enable AI Validation** - Provides additional confidence in results
-5. **Monitor Trends** - Track changes over time rather than single snapshots
-6. **Exclude Generated Files** - Avoid false positives from bundled code
-7. **Review Multiple Strategies** - Single detection method may be inconclusive
+1. **Use Configuration Files** — Ensures consistent thresholds across analyses
+2. **Review Flagged Commits** — Not all flags indicate AI generation
+3. **Consider Context** — Large commits may be legitimate (initial import, refactoring)
+4. **Enable AI Validation** — Provides additional confidence in results
+5. **Monitor Trends** — Track changes over time rather than single snapshots
+6. **Exclude Generated Files** — Avoid false positives from bundled code
+7. **Review Multiple Strategies** — Single detection method may be inconclusive
 
 ## Next Steps
 
-**Analyze other sources:**
-- [Web Analysis Guide](/docs/web-analysis-guide) - Analyze websites for AI content
-- [Quick Start](/docs/quick-start) - Getting started quickly
-
-**Or configure:**
-- [Configuration Reference](/docs/configuration) - Customize behavior
-- [Advanced Configuration](/docs/advanced-configuration) - AI validation, webhooks, more
-- [Troubleshooting Guide](/docs/troubleshooting-guide) - Common issues and solutions
+- [Web Analysis Guide](/docs/analysis/web) — Analyze websites for AI content
+- [Repository Analysis](/docs/analysis/repository) — Practical usage guide
+- [Detection Strategies](/docs/cli/detection-strategies) — All strategies explained
+- [Configuration](/docs/getting-started/configuration) — Customize behavior
+- [AI Integration](/docs/ai) — Add AI-powered analysis

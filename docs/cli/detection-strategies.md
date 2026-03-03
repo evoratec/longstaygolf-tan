@@ -320,304 +320,246 @@ Identifies overused or unusual special character patterns.
 
 Cadence analyzes website content with 20 distinct strategies for patterns commonly found in AI-generated text.
 
-### 1. Generic Language Detection
+### 1. Overused Phrases Detection
 
-Identifies overused, generic phrases common in AI output.
+Identifies common AI-generated filler phrases and clichés.
+
+**Registry name:** `overused_phrases` · **Confidence:** 0.8 · **Category:** Linguistic
 
 **Suspicious patterns:**
 - "In today's world" or "In the modern era"
 - "It is important to note that"
 - "Cutting-edge solutions" or "innovative approach"
-- "Maximize efficiency" or "optimize productivity"
+- "Furthermore" and excessive connectors
 
 **Why it matters:**
 AI models are trained on common phrases and reuse them frequently. Human writing is more varied.
 
-**Example:**
-- Page full of: "In today's fast-paced world..." = suspicious
-- Specific, unique phrasing = normal
+### 2. Generic Language Detection
 
-### 2. Perfect Grammar Detection
+Identifies overused, generic business and marketing language.
 
-Identifies passages with suspiciously uniform grammar and punctuation.
+**Registry name:** `generic_language` · **Confidence:** 0.7 · **Category:** Linguistic
 
 **Suspicious patterns:**
-- Every sentence perfectly grammatical
+- "Maximize efficiency" or "optimize productivity"
+- "Leverage synergies" and corporate buzzwords
+- Vague superlatives without evidence
+
+### 3. Excessive Structure Detection
+
+Detects over-structured content with too many lists, headings, and rigid formatting.
+
+**Registry name:** `excessive_structure` · **Confidence:** 0.6 · **Category:** Structural
+
+**Suspicious patterns:**
+- Every section has identical sub-structure
+- Excessive use of bullet lists and numbered lists
+- Every paragraph preceded by a heading
+- Overly symmetrical layout
+
+### 4. Perfect Grammar Detection
+
+Identifies suspiciously uniform and flawless sentence construction.
+
+**Registry name:** `perfect_grammar` · **Confidence:** 0.5 · **Category:** Linguistic
+
+**Suspicious patterns:**
+- Every sentence perfectly grammatical with no natural variation
 - Uniform sentence structure across entire page
 - No contractions or colloquialisms
 - Excessively formal throughout
 
-**Why it matters:**
-Real human writing has natural variations and occasional imperfections. AI can produce text that's *too* correct.
+### 5. Boilerplate Text Detection
 
-**Example:**
-- "The implementation was executed flawlessly. The results were optimized accordingly." (repeated pattern)
-- Natural variation in structure = normal
+Identifies reused, templated, or cookie-cutter text patterns.
 
-### 3. Placeholder Pattern Detection
-
-Finds common filler and placeholder patterns.
+**Registry name:** `boilerplate_text` · **Confidence:** 0.7 · **Category:** Pattern
 
 **Suspicious patterns:**
-- "[noun] that [verb]" constructions repeated
-- Generic section headers: "Overview", "Benefits", "Conclusion"
-- Repetitive intro paragraphs
-- Placeholder-style language
+- Standard disclaimers appearing verbatim across pages
+- Identical "About Us" or "Our Mission" sections
+- Stock phrases reused in multiple contexts
+- Template-like intro paragraphs
 
-**Why it matters:**
-AI often generates template-like content with repetitive structures. Human writing has more natural variation.
+### 6. Repetitive Patterns Detection
 
-**Example:**
-- Every section starts with identical structure = suspicious
-- Varied section organization = normal
+Detects repeated sentence structures and formatting patterns.
 
-### 4. Boilerplate Content Detection
-
-Identifies reused or templated text.
+**Registry name:** `repetitive_patterns` · **Confidence:** 0.7 · **Category:** Pattern
 
 **Suspicious patterns:**
-- Identical disclaimers appearing in content
-- Standard license text in prose
-- Repeated descriptions across pages
-- Stock phrases in multiple contexts
+- Identical sentence openings across paragraphs
+- Same paragraph structure repeated throughout
+- Every section following the same formula
 
-**Why it matters:**
-AI can generate identical sections. Humans typically adapt content to context.
+### 7. Missing Nuance Detection
 
-**Example:**
-- Same paragraph on 5 different product pages = suspicious
-- Unique content per page = normal
+Detects excessive absolute terms and lack of qualifying language.
 
-### 8. Emoji Overuse Detection
+**Registry name:** `missing_nuance` · **Confidence:** 0.6 · **Category:** Linguistic
 
-Detects excessive or misplaced emoji usage in web content.
+**Suspicious patterns:**
+- Overuse of "always", "never", "every"
+- No hedging or qualifying statements
+- Lack of "sometimes", "often", "may"
+- Absolutist claims without evidence
 
-**How it works:**
-- Counts emoji frequency in content
-- Analyzes emoji-to-word ratios
-- Flags inappropriate emoji usage
+### 8. Excessive Transitions Detection
 
-**Suspicious indicators:**
+Identifies overuse of transition words and connectors.
+
+**Registry name:** `excessive_transitions` · **Confidence:** 0.7 · **Category:** Linguistic
+
+**Suspicious patterns:**
+- Every paragraph starts with "Furthermore", "Moreover", "Additionally"
+- Excessive use of "However", "Nevertheless", "Consequently"
+- Transition-to-sentence ratio is unnaturally high
+
+### 9. Uniform Sentence Length Detection
+
+Detects unnaturally uniform sentence lengths across content.
+
+**Registry name:** `uniform_sentence_length` · **Confidence:** 0.6 · **Category:** Statistical
+
+**Suspicious patterns:**
+- Low standard deviation in sentence word counts
+- Most sentences within a narrow length range
+- Lack of natural short/long sentence variation
+
+### 10. AI Vocabulary Detection
+
+Identifies AI-characteristic vocabulary and word choices.
+
+**Registry name:** `ai_vocabulary` · **Confidence:** 0.8 · **Category:** Linguistic
+
+**Suspicious patterns:**
+- "Delve", "tapestry", "landscape" (of something)
+- "Multifaceted", "myriad", "nuanced" overuse
+- Formal academic vocabulary in casual contexts
+- Words rarely used in natural writing but common in AI output
+
+### 11. Emoji Overuse Detection
+
+Detects excessive or misplaced emoji usage in content.
+
+**Registry name:** `emoji_overuse` · **Confidence:** 0.4 · **Category:** Pattern
+
+**Suspicious patterns:**
 - High emoji density in professional content
 - Emoji in unexpected contexts
 - Random or decorative emoji placement
 
-### 9. Special Character Detection
+### 12. Special Character Detection
 
-Identifies unusual special character patterns in web content.
+Identifies unusual special character patterns.
 
-**How it works:**
-- Analyzes special character usage
-- Detects decorative patterns
-- Flags excessive punctuation
+**Registry name:** `special_characters` · **Confidence:** 0.4 · **Category:** Pattern
 
-**Suspicious indicators:**
+**Suspicious patterns:**
 - Excessive dashes, asterisks, or underscores
 - Decorative separators
 - Unusual punctuation patterns
 
-### 10. Missing Alt Text Detection
+### 13. Missing Alt Text Detection
 
 Flags images without accessibility descriptions.
 
-**How it works:**
-- Scans for `<img>` tags
-- Checks for `alt` attribute presence
-- Validates alt text quality
+**Registry name:** `missing_alt_text` · **Confidence:** 0.3 · **Category:** Accessibility
 
-**Suspicious indicators:**
-- Images without alt attributes
+**Suspicious patterns:**
+- `<img>` tags without `alt` attributes
 - Empty or placeholder alt text
 - Low alt-to-image ratio
 
-### 11. Semantic HTML Detection
+### 14. Semantic HTML Issues Detection
 
 Identifies improper HTML tag usage (excessive divs vs semantic tags).
 
-**How it works:**
-- Counts div vs semantic tag usage
-- Analyzes HTML structure
-- Flags poor semantic markup
+**Registry name:** `semantic_html_issues` · **Confidence:** 0.3 · **Category:** Accessibility
 
-**Suspicious indicators:**
+**Suspicious patterns:**
 - Excessive div usage (>70% of structure)
-- Missing semantic tags (nav, header, section, etc.)
-- Poor HTML semantics
+- Missing semantic tags (nav, header, section, article, etc.)
+- Poor HTML structure suggesting AI-generated markup
 
-### 12. Accessibility Markers Detection
+### 15. Accessibility Markers Detection
 
 Detects missing ARIA labels, roles, and language attributes.
 
-**How it works:**
-- Checks for ARIA attributes
-- Validates language attributes
-- Analyzes accessibility coverage
+**Registry name:** `accessibility_markers` · **Confidence:** 0.3 · **Category:** Accessibility
 
-**Suspicious indicators:**
-- Missing aria-label attributes
+**Suspicious patterns:**
+- Missing aria-label attributes on interactive elements
 - No role definitions
-- Missing lang attributes
+- Missing `lang` attributes
 
-### 13. Heading Hierarchy Detection
+### 16. Heading Hierarchy Issues Detection
 
 Identifies non-sequential heading levels in HTML.
 
-**How it works:**
-- Analyzes h1-h6 tag sequence
-- Validates heading hierarchy
-- Flags skipped levels or out-of-order headings
+**Registry name:** `heading_hierarchy_issues` · **Confidence:** 0.4 · **Category:** Structural
 
-**Suspicious indicators:**
-- Skipped heading levels (h1 to h3)
-- Multiple h1 tags
-- Improper heading structure
+**Suspicious patterns:**
+- Skipped heading levels (h1 directly to h3)
+- Multiple h1 tags per page
+- Out-of-order heading structure
 
-### 14. Hardcoded Values Detection
+### 17. Hardcoded Values Detection
 
-Detects hardcoded pixels, colors, and values instead of using CSS variables.
+Detects inline styles, hardcoded pixels, and color values.
 
-**How it works:**
-- Scans for inline styles
-- Detects pixel values
-- Identifies hardcoded colors
+**Registry name:** `hardcoded_values` · **Confidence:** 0.5 · **Category:** Pattern
 
-**Suspicious indicators:**
-- Excessive inline styles
-- Hardcoded pixel measurements
-- Colors defined inline instead of in CSS
+**Suspicious patterns:**
+- Excessive inline `style` attributes
+- Hardcoded pixel measurements (`width: 300px`)
+- Colors defined inline instead of via CSS variables
 
-### 15. Form Issues Detection
+### 18. Form Issues Detection
 
 Flags missing labels, improper input types, and form accessibility issues.
 
-**How it works:**
-- Analyzes form structure
-- Checks for labels
-- Validates input attributes
+**Registry name:** `form_issues` · **Confidence:** 0.3 · **Category:** Accessibility
 
-**Suspicious indicators:**
-- Inputs without labels
-- Missing placeholder text
-- Improper input types
+**Suspicious patterns:**
+- Inputs without associated labels
+- Missing or incorrect input `type` attributes
+- Forms without proper `name` attributes
 
-### 16. Generic Link Text Detection
+### 19. Link Text Quality Detection
 
-Identifies generic link phrases like "click here" or "read more".
+Identifies generic or non-descriptive link text.
 
-**How it works:**
-- Extracts link text
-- Matches against generic phrases
-- Calculates link quality
+**Registry name:** `link_text_quality` · **Confidence:** 0.4 · **Category:** Accessibility
 
-**Suspicious indicators:**
+**Suspicious patterns:**
 - "Click here" links
 - "Read more" without context
-- Generic or non-descriptive link text
+- Single-word link text like "link" or "here"
 
-### 17. Generic Styling Detection
+### 20. Generic Styling Detection
 
-Detects default colors, missing custom theming, and lack of design personality.
+Detects default colors, missing theming, and overuse of inline styles.
 
-**How it works:**
-- Analyzes CSS variables and theming
-- Detects media queries
-- Checks for custom styling
-
-**Suspicious indicators:**
-- Default color schemes
-- No CSS variables or theming
-- Missing responsive design
-
-### 18. Overused Phrases Detection
-
-Identifies common AI phrases and clichés in content.
-
-**How it works:**
-- Scans for common AI phrases
-- Analyzes phrase frequency
-- Flags repetitive language
-
-**Suspicious indicators:**
-- "In today's world"
-- "Furthermore" and excessive connectors
-- "Cutting-edge" and "innovative" overuse
-
-### 19. Perfect Grammar Detection
-
-Flags unnaturally perfect grammar and sentence construction.
-
-**How it works:**
-- Analyzes sentence structure
-- Detects missing contractions
-- Flags overly polished writing
-
-**Suspicious indicators:**
-- No contractions in casual content
-- Perfectly complex sentences
-- Unnaturally perfect punctuation
-
-### 20. Boilerplate Content Detection
-
-Identifies template-like or cookie-cutter content patterns.
-
-**How it works:**
-- Recognizes boilerplate phrases
-- Detects repetitive patterns
-- Flags templated sections
-
-**Suspicious indicators:**
-- "Award-winning" repeated phrases
-- "Our mission" and standard templates
-- Identical sections across pages
-
-## Summary
-
-The 38 total strategies (18 Git + 20 Web) work together to identify AI-generated content with high accuracy. Each strategy contributes to a confidence score, with multiple triggering strategies indicating higher likelihood of AI generation.**Example:**
-- Every product description: 3 paragraphs, 5 bullet points, identical structure = suspicious
-- Varied content structure = normal
-
-### 6. Specificity Analysis
-
-Evaluates whether content lacks specific details.
+**Registry name:** `generic_styling` · **Confidence:** 0.4 · **Category:** Pattern
 
 **Suspicious patterns:**
-- Vague descriptions without numbers or examples
-- Missing concrete metrics or data
-- No author attribution or credentials
-- Lack of specific details about methods or results
+- Default color schemes with no customization
+- No CSS variables or theming system
+- Missing responsive design / media queries
+- Overuse of inline styles over stylesheet
 
-**Why it matters:**
-AI-generated content often avoids specifics. Human writing includes concrete details.
-
-**Example:**
-- "Improves performance" (no numbers) = suspicious
-- "Reduced load time by 45% from 2.3s to 1.26s" = specific and normal
-
-### 7. Structural Pattern Detection
-
-Examines overall organization and formatting patterns.
-
-**Suspicious patterns:**
-- Identical heading/subheading hierarchy across pages
-- Uniform whitespace and padding
-- Every section has identical structure
-- Overly symmetrical layout
-
-**Why it matters:**
-AI tends to generate perfectly structured content. Human writing has natural organic variation.
-
-**Example:**
-- Every page: H1, 3x H2, 2 paragraphs per H2 = suspicious
-- Varied structure based on content = normal
+---
 
 ## How Scoring Works
 
 Cadence doesn't flag content based on a single strategy match. Instead:
 
-1. **Individual scores** - Each strategy produces a score from 0-100
-2. **Consensus** - Commitment is flagged when multiple strategies report high scores
-3. **Weighting** - Some strategies are weighted more heavily
-4. **Final result** - Overall suspicion from 0-100
+1. **Individual scores** - Each strategy produces a confidence score (0.0–1.0)
+2. **Consensus** - Content is flagged when multiple strategies report high scores
+3. **Weighting** - Strategies have different base confidence levels (shown above)
+4. **Final result** - Combined analysis across all triggered strategies
 
 A commit flagged by 5+ strategies is far more likely to be suspicious than one flagged by a single strategy.
 
@@ -634,6 +576,11 @@ thresholds:
   min_time_delta_seconds: 60      # Higher = less sensitive
   max_files_per_commit: 50        # Lower = more restrictive
   max_addition_ratio: 0.95        # Lower = stricter
+
+# Disable specific strategies
+strategies:
+  commit_message_analysis: false   # Disable commit message checks
+  template_pattern: false          # Disable template detection
 ```
 
 ## Next Steps

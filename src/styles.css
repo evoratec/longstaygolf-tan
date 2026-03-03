@@ -193,9 +193,32 @@ pre::-webkit-scrollbar-thumb:hover,
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Sidebar scrollbar styling */
+[data-docs-sidebar]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-docs-sidebar]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-docs-sidebar]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+[data-docs-sidebar]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-docs-sidebar] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
 /* Prevent page-level horizontal scroll */
 html {
-  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -208,6 +231,38 @@ body {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.05);
+}
+
+/* Details / summary animation */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details[open] > *:not(summary) {
+  animation: details-expand 0.2s ease-out;
+}
+@keyframes details-expand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+details > *:not(summary) {
+  padding: 0 1rem 1rem;
+}
+
+/* Counter for ordered lists */
+.counter-reset-\\[list-counter\\] {
+  counter-reset: list-counter;
+}
+.counter-increment-\\[list-counter\\] {
+  counter-increment: list-counter;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(52, 211, 153, 0.25);
+  color: white;
 }
 
 :root {

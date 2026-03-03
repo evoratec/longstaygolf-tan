@@ -73,7 +73,7 @@ export function DetectionStrategies() {
 						Detection Strategies
 					</h2>
 					<p className="text-base text-white/50 max-w-2xl mx-auto">
-						46 specialized detection strategies combining pattern analysis with
+						38 specialized detection strategies combining pattern analysis with
 						statistical markers
 					</p>
 				</div>

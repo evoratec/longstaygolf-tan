@@ -5,12 +5,11 @@ import {
 	Clock,
 	FileJson,
 	GitBranch,
-	GithubIcon,
 	Globe,
-	Twitter,
 	Users,
 	Zap,
 } from "lucide-react";
+import { SiGithub, SiX } from "react-icons/si";
 import { LogoIcon } from "../components/Logo";
 import { Footer } from "../components/landing/Footer";
 import { useVersion } from "../lib/useVersion";
@@ -273,6 +272,12 @@ function ExamplesPage() {
 						</Link>
 						<nav className="flex items-center gap-4">
 							<Link
+								to="/analysis"
+								className="text-sm text-white/50 hover:text-white transition-colors"
+							>
+								Playground
+							</Link>
+							<Link
 								to="/docs"
 								className="text-sm text-white/50 hover:text-white transition-colors"
 							>
@@ -284,7 +289,7 @@ function ExamplesPage() {
 								rel="noopener noreferrer"
 								className="text-sm text-white/50 hover:text-white transition-colors"
 							>
-								<Twitter className="w-4 h-4" />
+								<SiX className="w-3.5 h-3.5" />
 							</a>
 							<a
 								href="https://github.com/TryCadence/Cadence"
@@ -292,7 +297,7 @@ function ExamplesPage() {
 								rel="noopener noreferrer"
 								className="text-sm text-white/50 hover:text-white transition-colors flex items-center gap-1"
 							>
-								<GithubIcon className="w-3 h-3" />
+								<SiGithub className="w-4 h-4" />
 							</a>
 						</nav>
 					</div>
@@ -538,7 +543,7 @@ function ExamplesPage() {
 															{pattern.name}
 														</span>
 													</div>
-													<span className="text-xs text-white/40 text-right max-w-[200px] truncate">
+													<span className="text-xs text-white/40 text-right max-w-50 truncate">
 														{pattern.detail}
 													</span>
 												</div>

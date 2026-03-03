@@ -1,4 +1,5 @@
-import { Github, Menu, Twitter, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { SiGithub, SiX } from "react-icons/si";
 import { useState } from "react";
 import { useVersion } from "../../lib/useVersion";
 import { LogoIcon } from "../Logo";
@@ -36,6 +37,12 @@ export function Header() {
 							Examples
 						</a>
 						<a
+							href="/analysis"
+							className="text-sm text-white/50 hover:text-white transition-colors"
+						>
+							Playground
+						</a>
+						<a
 							href="/changelog"
 							className="text-sm text-white/50 hover:text-white transition-colors"
 						>
@@ -62,8 +69,8 @@ export function Header() {
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								<Twitter className="w-4 h-4" />
-								Twitter
+								<SiX className="w-3.5 h-3.5" />
+								Twitter/X
 							</a>
 						</Button>
 						<Button
@@ -77,7 +84,7 @@ export function Header() {
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								<Github className="w-4 h-4" />
+								<SiGithub className="w-4 h-4" />
 								GitHub
 							</a>
 						</Button>

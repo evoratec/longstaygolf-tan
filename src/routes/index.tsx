@@ -8,6 +8,7 @@ import { Hero } from "../components/landing/Hero";
 import { QuickStart } from "../components/landing/QuickStart";
 import { StatsBar } from "../components/landing/StatsBar";
 import { LandingLayout } from "../components/layouts/LandingLayout";
+import { AnalysisPlaygroundSection } from "../components/landing/AnalysisPlaygroundSection";
 
 export const Route = createFileRoute("/")({
 	component: HomePage,
@@ -22,6 +23,7 @@ function HomePage() {
 			<ExampleReports />
 			<QuickStart />
 			<DetectionStrategies />
+			<AnalysisPlaygroundSection />
 			<CTASection />
 			{/**<Partners /> */}
 			<Footer />

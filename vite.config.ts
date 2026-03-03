@@ -6,7 +6,7 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 
-const config = defineConfig({
+const config = defineConfig(({ mode }) => ({
 	server: {
 		port: 39249,
 		host: "0.0.0.0",
@@ -14,7 +14,13 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		cloudflare({ viteEnvironment: { name: "ssr" } }),
+		...(mode === "production"
+			? [
+					cloudflare({
+						configPath: "./wrangler.jsonc",
+					}),
+				]
+			: []),
 		viteTsConfigPaths({
 			projects: ["./tsconfig.json"],
 		}),
@@ -22,6 +28,6 @@ const config = defineConfig({
 		tanstackStart(),
 		viteReact(),
 	],
-});
+}));
 
 export default config;

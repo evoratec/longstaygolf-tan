@@ -71,7 +71,7 @@ When reporting a bug, include:
 **Actual:** Panic: runtime error: index out of range
 
 **Environment:**
-- Cadence: v0.2.1
+- Cadence: v0.3.0
 - Go: 1.24.0
 - OS: Ubuntu 22.04
 ```
@@ -501,8 +501,8 @@ Maintainers handle releases:
 
 - **Discussions**: [GitHub Discussions](https://github.com/TryCadence/Cadence/discussions)
 - **Issues**: [GitHub Issues](https://github.com/TryCadence/Cadence/issues)
-- **Email**: [hey@codemeapixel.dev](mailto:hey@codemeapixel.dev)
-- **Documentation**: [docs.cadence.sh](/)
+- **Email**: [hey@noslop.tech](mailto:hey@noslop.tech)
+- **Documentation**: [noslop.tech](/)
 
 ## Recognition
 

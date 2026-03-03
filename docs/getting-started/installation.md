@@ -51,14 +51,12 @@ go build -o cadence ./cmd/cadence
 #### Step 3: Verify Installation
 
 ```bash
-./cadence version
+./bin/cadence version
 ```
 
 You should see output like:
 ```
-Cadence version v2.1.0
-Git Commit: abc123def456
-Build Time: 2024-01-15T10:30:00Z
+Cadence v0.3.0 (abc123de) built at 2026-03-03T10:30:00Z
 ```
 
 ### Method 2: Go Install
@@ -77,7 +75,20 @@ cadence version
 
 ### Method 3: Download Pre-built Binary
 
-Check [GitHub Releases](https://github.com/TryCadence/Cadence/releases) for pre-built binaries for your platform.
+Pre-built binaries are available for:
+
+| Platform | Architecture | Binary name |
+|----------|-------------|-------------|
+| macOS | Apple Silicon (M1/M2/M3) | `cadence-darwin-arm64` |
+| macOS | Intel | `cadence-darwin-amd64` |
+| Linux | x86-64 | `cadence-linux-amd64` |
+
+Check [GitHub Releases](https://github.com/TryCadence/Cadence/releases) for downloads. Then make it executable:
+
+```bash
+chmod +x ./cadence-darwin-arm64
+./cadence-darwin-arm64 version
+```
 
 ## Add to PATH (Optional)
 
@@ -128,15 +139,15 @@ make build
 Available Make targets:
 
 ```bash
-make build   # Build binary with version injection
-make install # Install to $GOPATH/bin
-make test    # Run all tests
-make fmt     # Format code
-make tidy    # Tidy dependencies
-make lint    # Run linter
-make vet     # Run go vet
-make clean   # Remove build artifacts
-make help    # Show all targets
+make build    # Build binary with version injection (output: ./bin/cadence)
+make install  # Install to $GOPATH/bin
+make test     # Run all tests
+make fmt      # Format code
+make tidy     # Tidy dependencies (go mod tidy)
+make lint     # Run linter (golangci-lint)
+make vet      # Run go vet
+make clean    # Remove build artifacts
+make help     # Show all targets
 ```
 
 ## Troubleshooting
@@ -168,8 +179,16 @@ Ensure you're in the Cadence directory and have internet connection:
 
 ```bash
 cd Cadence
-go mod download
+go mod tidy
 go build -o cadence ./cmd/cadence
+```
+
+### Configuration file not auto-detected
+
+`cadence config init` creates `.cadence.yaml`. However, the `analyze` and `web` commands auto-detect `cadence.yml` (without the leading dot). To use your generated config, always pass it explicitly:
+
+```bash
+cadence analyze /repo --config .cadence.yaml -o report.json
 ```
 
 ### Permission denied (macOS/Linux)

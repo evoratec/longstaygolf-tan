@@ -1,4 +1,4 @@
-# Build & Development Guide
+# Development Guide
 
 Complete guide to building Cadence from source, development setup, and using Make for common tasks.
 

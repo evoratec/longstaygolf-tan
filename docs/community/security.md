@@ -1,15 +1,13 @@
 ---
 title: Security Policy
-description: Security practices, vulnerability reporting, and best practices for Cadence
-category: Reference
-difficulty: Intermediate
-time_estimate: 10 min
-prerequisites: []
+description: How to report vulnerabilities and our security response process
 ---
 
 # Security Policy
 
-Cadence takes security seriously. This document outlines our security practices, how to report vulnerabilities, and best practices for using Cadence securely.
+Cadence takes security seriously. This document covers how to report vulnerabilities and our process for handling them responsibly.
+
+For deployment hardening, configuration security, and operational best practices, see the [Security Best Practices](/docs/reference/operations/security) guide.
 
 ## Reporting a Vulnerability
 
@@ -62,7 +60,7 @@ by crafting malicious repository URLs.
 2. Observe shell command execution
 
 **Environment:**
-- Cadence: v0.2.1
+- Cadence: v0.3.0
 - OS: Linux
 - Go: 1.24.0
 
@@ -79,360 +77,69 @@ We aim to respond within:
 - **30 days**: Patch development and testing (for non-critical issues)
 - **Immediate**: Emergency patch for critical vulnerabilities
 
-You'll receive updates on:
-- Vulnerability confirmation
-- Fix development progress
-- Expected release date
-- Public disclosure timeline
-
-### Recognition
-
-We appreciate responsible disclosure. If you'd like:
-
-- **Credit in Security Advisory**: We'll acknowledge your contribution
-- **Listed as Reporter**: Your name/handle in release notes
-- **Anonymity**: We'll keep your identity private if requested
+You'll receive updates on vulnerability confirmation, fix development progress, expected release date, and public disclosure timeline.
 
 ## Supported Versions
 
 | Version | Status | Support Level |
 |---------|--------|---------------|
-| v0.2.x  | Current | Full support with security fixes, bug fixes, and features |
-| v0.1.x  | Legacy | Security fixes only, no new features |
+| v0.3.x  | Current | Full support with security fixes, bug fixes, and features |
+| v0.2.x  | Maintenance | Security fixes only, no new features |
+| v0.1.x  | EOL | Not supported, please upgrade |
 | < v0.1  | EOL | Not supported, please upgrade |
 
-**Recommendation:** Always use the latest stable release for the best security posture.
+Always use the latest stable release for the best security posture.
 
-### Checking Your Version
-
-```bash
-cadence version
-```
-
-### Updating Cadence
-
-```bash
-# Using Make
-cd Cadence
-git pull
-make build
-
-# Or download latest release
-# https://github.com/TryCadence/Cadence/releases/latest
-```
-
-## Security Updates
-
-### Notification Channels
-
-Stay informed about security updates:
-
-1. **GitHub Security Advisories**: [View advisories](https://github.com/TryCadence/Cadence/security/advisories)
-2. **Release Notes**: Check `CHANGELOG.md` for security fixes
-3. **GitHub Watch**: Watch releases for notifications
-
-### Severity Levels
+## Severity Levels
 
 We classify vulnerabilities using CVSS scores:
 
 | Severity | CVSS Score | Response Time | Examples |
 |----------|------------|---------------|----------|
-| **Critical** | 9.0-10.0 | Immediate | Remote code execution, auth bypass |
-| **High** | 7.0-8.9 | 7 days | Privilege escalation, data exposure |
-| **Medium** | 4.0-6.9 | 30 days | DoS, information disclosure |
-| **Low** | 0.1-3.9 | Next release | Minor info leaks, low-impact issues |
+| **Critical** | 9.0–10.0 | Immediate | Remote code execution, auth bypass |
+| **High** | 7.0–8.9 | 7 days | Privilege escalation, data exposure |
+| **Medium** | 4.0–6.9 | 30 days | DoS, information disclosure |
+| **Low** | 0.1–3.9 | Next release | Minor info leaks, low-impact issues |
 
-**Critical/High** issues trigger immediate patch releases.
+Critical and High severity issues trigger immediate patch releases.
 
-## Security Best Practices
+## Security Notifications
 
-### Using Cadence Securely
+Stay informed about security updates:
 
-#### 1. Configuration Files
+- **GitHub Security Advisories** — [View advisories](https://github.com/TryCadence/Cadence/security/advisories)
+- **Release Notes** — Check `CHANGELOG.md` for security fixes tagged `security`
+- **GitHub Watch** — Watch the repository and select "Releases" for notifications
 
-**DON'T:**
-```yaml
-# .cadence.yaml - DON'T commit secrets!
-ai:
-  api_key: "sk-proj-AbCdEf..."  # Exposed in version control
-```
+## Responsible Disclosure
 
-**DO:**
-```yaml
-# .cadence.yaml
-ai:
-  api_key: "${CADENCE_AI_KEY}"  # Use environment variables
+We ask that you:
 
-webhook:
-  secret: "${WEBHOOK_SECRET}"
-```
+- Give us reasonable time to address the issue before public disclosure
+- Avoid accessing or modifying user data beyond what is needed to demonstrate the vulnerability
+- Do not exploit the vulnerability beyond what's needed for a proof of concept
+- Keep details private until we have released a fix
 
-```bash
-# .env (add to .gitignore)
-export CADENCE_AI_KEY="sk-proj-AbCdEf..."
-export WEBHOOK_SECRET="your-secret-key"
-```
+We commit to:
 
-#### 2. Repository Analysis
+- Acknowledging reports promptly
+- Keeping you informed throughout the process
+- Not pursuing legal action against researchers acting in good faith
+- Crediting your contribution publicly (unless you prefer anonymity)
 
-**Analyzing untrusted repositories:**
+### Recognition
 
-```bash
-# Use isolated environment (Docker container)
-docker run --rm -v /tmp/analysis:/work cadence-cli \
-  cadence analyze /work/untrusted-repo
+If you'd like:
 
-# Or use a VM/sandbox
-```
+- **Credit in Security Advisory** — We'll acknowledge your contribution
+- **Listed as Reporter** — Your name or handle in release notes
+- **Anonymity** — We'll keep your identity private if requested
 
-**Why?** Malicious repositories could contain harmful git hooks or scripts.
-
-#### 3. Webhook Server Security
-
-**Always use HTTPS in production:**
-
-```nginx
-# nginx configuration
-server {
-    listen 443 ssl http2;
-    server_name cadence.yourdomain.com;
-    
-    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-    
-    location / {
-        proxy_pass http://localhost:3000;
-    }
-}
-```
-
-**Generate strong secrets:**
-
-```bash
-# Generate webhook secret
-openssl rand -hex 32
-```
-
-**Verify webhook signatures:**
-
-Cadence automatically verifies HMAC signatures for GitHub and GitLab webhooks. Never disable this validation.
-
-#### 4. API Key Management
-
-**Environment Variables:**
-
-```bash
-# Set API key securely
-export CADENCE_AI_KEY="sk-proj-..."
-
-# Don't pass via command line (visible in process list)
-# BAD: cadence analyze /repo --ai-key sk-proj-...
-```
-
-**Key Rotation:**
-
-Rotate API keys regularly:
-
-```bash
-# 1. Generate new key from OpenAI dashboard
-# 2. Update environment variable
-export CADENCE_AI_KEY="sk-proj-NEW_KEY"
-# 3. Revoke old key
-```
-
-#### 5. Network Security
-
-**Firewall Configuration:**
-
-```bash
-# Only allow webhook endpoints from trusted IPs
-ufw allow from 192.30.252.0/22 to any port 3000  # GitHub IPs
-ufw allow from 34.74.90.64/28 to any port 3000   # GitLab IPs
-```
-
-**Rate Limiting:**
-
-```yaml
-# cadence.yaml
-webhook:
-  rate_limit: 100  # requests per minute
-  max_workers: 4   # concurrent analysis jobs
-```
-
-#### 6. Data Privacy
-
-**Sensitive Repositories:**
-
-- Analyze locally without AI validation
-- Use self-hosted OpenAI-compatible models
-- Do not send proprietary code to external APIs without permission
-
-```bash
-# Analyze without AI (no external API calls)
-cadence analyze /path/to/repo --config config.yaml
-
-# Disable AI in config
-# .cadence.yaml
-ai:
-  enabled: false
-```
-
-**GDPR Compliance:**
-
-If analyzing repositories with EU contributors:
-- Don't store commit author information long-term
-- Provide data deletion on request
-- Document data processing in privacy policy
-
-### Deployment Security
-
-#### Docker Security
-
-**Non-root user:**
-
-```dockerfile
-# Dockerfile
-FROM alpine:latest
-RUN addgroup -g 1000 cadence && \
-    adduser -D -u 1000 -G cadence cadence
-
-USER cadence
-CMD ["cadence", "webhook"]
-```
-
-**Read-only filesystem:**
-
-```bash
-docker run --read-only --tmpfs /tmp cadence-webhook
-```
-
-#### systemd Hardening
-
-```ini
-[Service]
-# Run as non-root user
-User=cadence
-Group=cadence
-
-# Security hardening
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/var/lib/cadence
-
-# Restrict network
-RestrictAddressFamilies=AF_INET AF_INET6
-```
-
-## Dependencies
-
-Cadence uses the following key dependencies:
-
-| Dependency | Purpose | Security Monitoring |
-|------------|---------|---------------------|
-| `go-git/v5` | Git operations | Active monitoring |
-| `goquery` | HTML parsing | Active monitoring |
-| `cobra` | CLI framework | Active monitoring |
-| `fiber` | HTTP server | Active monitoring |
-| `openai-go` | AI integration | Active monitoring |
-
-### Dependency Updates
-
-We monitor dependencies for vulnerabilities using:
-- **GitHub Dependabot**: Automated security updates
-- **Go vulnerability database**: `go list -m -json all | nancy sleuth`
-
-### Supply Chain Security
-
-**Verify releases:**
-
-```bash
-# Verify release signature (coming soon)
-gpg --verify cadence-v0.2.1.tar.gz.sig
-
-# Check release SHA256
-sha256sum cadence-v0.2.1.tar.gz
-```
-
-**Build from source:**
-
-For maximum security, build from audited source:
-
-```bash
-git clone https://github.com/TryCadence/Cadence.git
-cd Cadence
-git verify-commit HEAD  # Verify commit signature
-make build
-```
-
-## Known Security Considerations
-
-### 1. AI Model Limitations
-
-**Context sent to OpenAI:**
-
-When AI validation is enabled, commit diffs are sent to OpenAI's API. This includes:
-- Code changes
-- Commit messages
-- File names
-
-**Mitigation:**
-- Disable AI for sensitive repositories
-- Use self-hosted models
-- Review OpenAI's [data usage policy](https://openai.com/policies/api-data-usage-policies)
-
-### 2. Git Clone Security
-
-**Cloning untrusted repositories:**
-
-Cadence clones repositories when analyzing GitHub URLs. Malicious repos could:
-- Contain large files (DoS)
-- Include malicious git hooks
-- Exploit git vulnerabilities
-
-**Mitigation:**
-- Run in isolated environment
-- Set resource limits (disk space, memory)
-- Use shallow clones (automatic)
-
-### 3. Webhook Server
-
-**Public-facing server risks:**
-
-The webhook server is a public HTTP endpoint. Risks:
-- DoS attacks
-- Brute force signature guessing
-- Resource exhaustion
-
-**Mitigation:**
-- Use rate limiting
-- Verify webhook signatures
-- Set worker limits
-- Monitor resource usage
-
-## Compliance
-
-### Open Source License
-
-Cadence is licensed under **AGPL-3.0**. Key implications:
-
-- Free to use, modify, and distribute
-- Source code available for audit
-- Modifications must be disclosed if deployed as a service
-- Derivative works must use compatible license
-
-See [LICENSE](https://github.com/TryCadence/Cadence/blob/main/LICENSE) for details.
-
-### No Warranty
-
-Cadence is provided "as is" without warranty of any kind, express or implied. The authors are not liable for any damages or consequences arising from the use of this tool.
-
-## Security Contact
+## Contact
 
 For security-related questions (not vulnerability reports):
 
-- **Email**: [security@noslop.tech](mailto:security@noslop.tech)
+- **Security**: [security@noslop.tech](mailto:security@noslop.tech)
 - **Support**: [support@noslop.tech](mailto:support@noslop.tech)
 - **Discussions**: [GitHub Discussions](https://github.com/TryCadence/Cadence/discussions)
 
@@ -440,7 +147,5 @@ For vulnerability reports, use the [reporting process](#reporting-a-vulnerabilit
 
 ---
 
-**Last Updated**: February 2026  
-**Next Review**: May 2026
+**Last Updated**: March 2026
 
-Thank you for helping keep Cadence secure!

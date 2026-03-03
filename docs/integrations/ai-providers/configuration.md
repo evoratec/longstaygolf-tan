@@ -1,11 +1,12 @@
 ---
-title: AI Configuration
-description: Configure OpenAI integration for Cadence analysis
+title: Configuration
+description: Configure OpenAI or Anthropic integration for Cadence analysis
+order: 1
 ---
 
 # AI Configuration
 
-Configure Cadence to use OpenAI for enhanced commit analysis.
+Configure Cadence to use OpenAI or Anthropic for enhanced commit analysis.
 
 ## Environment Variables
 
@@ -15,33 +16,28 @@ Configure AI using environment variables:
 # Enable AI analysis
 export CADENCE_AI_ENABLED=true
 
-# Set provider (currently only "openai" supported)
+# Set provider ("openai" or "anthropic")
 export CADENCE_AI_PROVIDER=openai
 
-# OpenAI API key (required)
+# API key (required)
 export CADENCE_AI_KEY=sk-proj-your-api-key-here
 
-# Model to use (optional, defaults to gpt-4o-mini)
+# Model to use (optional, defaults to provider default)
+# OpenAI default: gpt-4o-mini
+# Anthropic default: claude-sonnet-4-20250514
 export CADENCE_AI_MODEL=gpt-4-turbo
 ```
 
 ## Configuration File
 
-In your `cadence.yml`:
+In your `.cadence.yaml`:
 
 ```yaml
 ai:
   enabled: true
-  provider: openai
-  api_key: "${CADENCE_AI_KEY}"  # Use environment variables
-  model: gpt-4-turbo
-```
-
-Load environment variables before running:
-
-```bash
-export CADENCE_AI_KEY=sk-proj-...
-cadence analyze ./repo -o report.txt
+  provider: "openai"            # or "anthropic"
+  api_key: ""                   # Or use CADENCE_AI_KEY env var
+  model: ""                     # Leave empty for provider default
 ```
 
 ## Security Best Practices
@@ -52,12 +48,12 @@ cadence analyze ./repo -o report.txt
 
 ```bash
 # Set temporarily for single command
-CADENCE_AI_KEY=sk-proj-... cadence analyze ./repo
+CADENCE_AI_KEY=sk-proj-... cadence analyze ./repo -o report.txt
 
 # Set for session
 export CADENCE_AI_KEY=sk-proj-...
-cadence analyze ./repo1
-cadence analyze ./repo2
+cadence analyze ./repo1 -o report1.txt
+cadence analyze ./repo2 -o report2.txt
 ```
 
 ### Using .env File
@@ -76,7 +72,7 @@ Load before running:
 ```bash
 # Linux/macOS
 source .env
-cadence analyze ./repo
+cadence analyze ./repo -o report.txt
 
 # Windows (PowerShell)
 Get-Content .env | ForEach-Object {
@@ -84,7 +80,7 @@ Get-Content .env | ForEach-Object {
   $key, $value = $_ -split '=', 2
   [Environment]::SetEnvironmentVariable($key, $value)
 }
-cadence analyze ./repo
+cadence analyze ./repo -o report.txt
 ```
 
 ### Add to .gitignore
@@ -103,50 +99,48 @@ Use secrets management:
 **GitHub Actions:**
 ```yaml
 env:
-  CADENCE_AI_KEY: ${{ secrets.OPENAI_API_KEY }}
+  CADENCE_AI_KEY: ${{ secrets.CADENCE_AI_KEY }}
 ```
 
 **GitLab CI:**
 ```yaml
 variables:
-  CADENCE_AI_KEY: $OPENAI_API_KEY  # Set in CI/CD Variables
-```
-
-**Generic:**
-```bash
-# In your CI/CD platform, set CADENCE_AI_KEY as a secret
-# Then pass to the job as an environment variable
+  CADENCE_AI_KEY: $CADENCE_AI_KEY  # Set in CI/CD Variables
 ```
 
 ## Model Selection
 
-### Default: gpt-4o-mini
+### OpenAI Models
 
+**Default: gpt-4o-mini**
 ```bash
-export CADENCE_AI_ENABLED=true
 export CADENCE_AI_PROVIDER=openai
 export CADENCE_AI_KEY=sk-proj-...
 # Model defaults to gpt-4o-mini
 ```
 
-### High Accuracy: gpt-4
-
+**High Accuracy: gpt-4**
 ```bash
 export CADENCE_AI_MODEL=gpt-4
 ```
 
-### Balanced: gpt-4-turbo
-
+**Balanced: gpt-4-turbo**
 ```bash
 export CADENCE_AI_MODEL=gpt-4-turbo
 ```
 
-### List Available Models
+### Anthropic Models
 
+**Default: claude-sonnet-4-20250514**
 ```bash
-# Via curl
-curl https://api.openai.com/v1/models \
-  -H "Authorization: Bearer $CADENCE_AI_KEY" | jq '.data[].id'
+export CADENCE_AI_PROVIDER=anthropic
+export CADENCE_AI_KEY=sk-ant-...
+# Model defaults to claude-sonnet-4-20250514
+```
+
+**Fast: claude-haiku**
+```bash
+export CADENCE_AI_MODEL=claude-haiku
 ```
 
 ## Disabling AI
@@ -167,11 +161,11 @@ cadence analyze ./repo -o report.txt
 Check if AI is properly configured:
 
 ```bash
-# Run analysis - if AI config is invalid, you'll see errors
-cadence analyze ./test-repo -o test-report.txt
+# Run analysis — if AI config is invalid, you'll see errors
+cadence analyze ./test-repo -o test-report.txt --config .cadence.yaml
 
-# Check logs for API errors
-echo $CADENCE_AI_KEY  # Verify key is set
+# Verify the key is set
+echo $CADENCE_AI_KEY
 ```
 
 ### Common Configuration Issues
@@ -182,19 +176,23 @@ echo $CADENCE_AI_KEY  # Verify key is set
 - Ensure you're in the correct shell session
 
 **"Invalid API key"**
-- Verify key format: `sk-proj-...`
-- Check key hasn't been revoked in OpenAI dashboard
+- Verify key format: OpenAI keys start with `sk-proj-`, Anthropic keys start with `sk-ant-`
+- Check the key hasn't been revoked in your provider dashboard
 - Try creating a new key
 
 **"Unknown model"**
 - Check model name spelling
-- Verify model is available for your API tier
-- Use `gpt-4o-mini` as fallback
+- Verify the model is available for your provider and API tier
+- Use the provider default by leaving `model` empty
+
+**"Unknown provider"**
+- Supported providers: `openai`, `anthropic`
+- Check spelling in config or `CADENCE_AI_PROVIDER` env var
 
 **"Rate limit exceeded"**
 - Wait before retrying
-- Check OpenAI account rate limits
-- Consider batching requests or upgrading API tier
+- Check your account rate limits with the provider
+- Consider batching requests or upgrading your API tier
 
 ## Advanced Configuration
 
@@ -219,19 +217,26 @@ export CADENCE_AI_TIMEOUT=60
 ### Use cheaper models for initial scans
 
 ```bash
-export CADENCE_AI_MODEL=gpt-4o-mini  # Lowest cost
+# OpenAI
+export CADENCE_AI_PROVIDER=openai
+export CADENCE_AI_MODEL=gpt-4o-mini
+cadence analyze ./repo -o report.txt
+
+# Anthropic
+export CADENCE_AI_PROVIDER=anthropic
+export CADENCE_AI_MODEL=claude-haiku
 cadence analyze ./repo -o report.txt
 ```
 
 ### Reserve expensive models for critical analysis
 
 ```bash
-export CADENCE_AI_MODEL=gpt-4  # Higher accuracy, higher cost
+export CADENCE_AI_MODEL=gpt-4        # or claude-sonnet-4-20250514
 cadence analyze ./critical-section -o critical-report.txt
 ```
 
 ## Next Steps
 
-- [View examples](/docs/ai/examples)
+- [View examples](/docs/integrations/ai-providers/examples)
 - [Understand detection strategies](/docs/cli/detection-strategies)
 - [Read about webhooks integration](/docs/integrations/webhooks)

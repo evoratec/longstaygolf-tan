@@ -100,12 +100,15 @@ Detect AI-generated text on websites:
 cadence web https://example.com -o report.json
 ```
 
+The URL is the first positional argument. The `-o` flag sets the output filename (saved in the `reports/` directory).
+
 ### Verbose Output
 
-Show detailed analysis with content quality metrics:
+Show detailed analysis with content quality metrics and detected pattern examples:
 
 ```bash
 cadence web https://example.com --verbose -o report.json
+# Short form: -v
 ```
 
 Shows:
@@ -114,15 +117,14 @@ Shows:
 - Detected patterns with confidence scores
 - Specific text examples from the page
 
-### Different Output Formats
+### JSON vs Text Output
 
-**JSON format:**
 ```bash
+# JSON format (explicit flag)
 cadence web https://example.com --json -o report.json
-```
+# Short form: -j
 
-**Text format (human-readable):**
-```bash
+# Text format (default)
 cadence web https://example.com -o report.txt
 ```
 
@@ -130,59 +132,37 @@ cadence web https://example.com -o report.txt
 
 ### Report Location
 
-Reports are saved to `reports/` directory by default:
+Reports are saved inside the `reports/` directory by default:
 
 ```bash
-# View the report
+# -o report.json → written to reports/report.json
+cadence analyze . -o report.json
 cat reports/report.json
-```
-
-### JSON Report Structure
-
-```json
-{
-  "suspicious_commits": [
-    {
-      "hash": "abc123",
-      "timestamp": "2024-01-15T10:30:00Z",
-      "author": "user@example.com",
-      "score": 0.85,
-      "strategies": {
-        "velocity": 0.9,
-        "timing": 0.8,
-        "file_dispersion": 0.7
-      }
-    }
-  ],
-  "stats": {
-    "total_commits": 100,
-    "flagged_commits": 3,
-    "risk_level": "medium"
-  }
-}
 ```
 
 ### Suspicion Scores
 
 Scores range from 0 (not suspicious) to 1.0 (highly suspicious):
 
-- **0.0 - 0.3** - Likely human-written
-- **0.3 - 0.6** - Possibly AI-generated, review needed
-- **0.6 - 0.8** - Likely AI-generated
-- **0.8 - 1.0** - Very likely AI-generated
+| Range | Interpretation |
+|-------|---------------|
+| 0.0 – 0.3 | Likely human-written |
+| 0.3 – 0.6 | Possibly AI-generated — review recommended |
+| 0.6 – 0.8 | Likely AI-generated |
+| 0.8 – 1.0 | Very likely AI-generated |
 
 ### Strategy Breakdown
 
 Each flagged commit shows which strategies triggered:
 
-- **Velocity** - Too many additions/deletions per minute
-- **Timing** - Unusual commit timing (multiple commits quickly)
-- **Size** - Single commit too large
-- **File Dispersion** - Changes affecting too many files
-- **Ratio** - Imbalanced additions/deletions
-- Plus 8+ additional strategies
+- **Velocity** — Additions/deletions per minute exceed threshold
+- **Timing** — Multiple commits within a short window
+- **Size** — Single commit is unusually large
+- **File Dispersion** — Changes spread across too many files
+- **Ratio** — Heavily addition-dominated (nothing deleted, suggesting generated code)
+- **Precision Analysis** — Advanced pattern matching across code style and structure
 
-See [Detection Strategies](/docs/cli/detection-strategies) for details on each.
+See [Detection Strategies](/docs/analysis/repository) for the full list.
 
 ## Common Workflows
 
@@ -237,32 +217,38 @@ make clean    # Clean artifacts
 
 ## Enable AI Validation (Optional)
 
-For advanced analysis using OpenAI GPT-4o-mini:
+For advanced analysis using OpenAI or Anthropic AI skills:
 
-### 1. Set API Key
+### 1. Set Environment Variables
 
 ```bash
-export OPENAI_API_KEY="sk-..."
+export CADENCE_AI_ENABLED=true
+export CADENCE_AI_PROVIDER=openai    # or: anthropic
+export CADENCE_AI_KEY=sk-...         # your provider API key
+export CADENCE_AI_MODEL=gpt-4o-mini  # optional: override default model
 ```
 
-### 2. Enable in Configuration
+**Provider defaults:**
+- OpenAI: `gpt-4o-mini`
+- Anthropic: `claude-sonnet-4-20250514`
 
-Edit `.cadence.yaml`:
+### 2. Or Enable in Configuration
 
 ```yaml
 ai:
   enabled: true
-  provider: openai
-  model: gpt-4o-mini
+  provider: openai      # or: anthropic
+  api_key: ""           # leave blank and use CADENCE_AI_KEY env var
+  model: ""             # leave blank for provider default
 ```
 
 ### 3. Run Analysis
 
 ```bash
-cadence analyze /path/to/repo --config cadence.yaml -o report.json
+cadence analyze /path/to/repo --config .cadence.yaml -o report.json
 ```
 
-The report will include AI analysis in the `ai_analysis` field.
+When enabled, AI skills run after the heuristic pipeline completes and populate additional fields: `report_summary`, `code_analysis`, `commit_review`, and `pattern_explain` results.
 
 ## Troubleshooting
 
@@ -280,11 +266,13 @@ cadence analyze https://github.com/owner/repo -o report.json
 
 ### "Config file not found"
 
-Place `cadence.yaml` in the directory where you run the command, or specify the path:
+Specify the full path to the config file:
 
 ```bash
-cadence analyze /repo --config /path/to/cadence.yaml -o report.json
+cadence analyze /repo --config /path/to/.cadence.yaml -o report.json
 ```
+
+Note: auto-detection looks for `cadence.yml` (not `.cadence.yaml`). The `config init` command creates `.cadence.yaml`, so always pass `--config .cadence.yaml` explicitly.
 
 ### "Content too short for analysis" (web)
 
@@ -294,6 +282,7 @@ Web analysis requires at least 50 words of content. Try a different page or chec
 
 ### Learn More
 
+- [Understanding Results](/docs/getting-started/understanding-results) - Score breakdowns, detection fields, and how to act on findings
 - [CLI Commands](/docs/cli/commands) - All commands and options
 - [Detection Strategies](/docs/cli/detection-strategies) - How analysis works
 - [Configuration](/docs/getting-started/configuration) - Advanced settings

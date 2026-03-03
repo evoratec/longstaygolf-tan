@@ -1,11 +1,12 @@
 ---
-title: AI Examples
-description: Practical examples using Cadence with OpenAI analysis
+title: Usage Examples
+description: Practical examples using Cadence with AI analysis (OpenAI and Anthropic)
+order: 2
 ---
 
 # AI Examples
 
-Practical examples for using Cadence with OpenAI analysis.
+Practical examples for using Cadence with AI analysis via OpenAI or Anthropic.
 
 ## Basic Usage
 
@@ -18,7 +19,7 @@ export CADENCE_AI_PROVIDER=openai
 export CADENCE_AI_KEY=sk-proj-your-key-here
 
 # Run analysis with AI
-cadence analyze ./my-project -o report.txt
+cadence analyze ./my-project -o report.txt --config .cadence.yaml
 ```
 
 ### Without AI
@@ -26,12 +27,12 @@ cadence analyze ./my-project -o report.txt
 ```bash
 # Disable AI analysis
 export CADENCE_AI_ENABLED=false
-cadence analyze ./my-project -o report.txt
+cadence analyze ./my-project -o report.txt --config .cadence.yaml
 ```
 
 ## Model Selection
 
-### Use Default Model (gpt-4o-mini)
+### OpenAI (Default: gpt-4o-mini)
 
 ```bash
 export CADENCE_AI_ENABLED=true
@@ -40,23 +41,20 @@ export CADENCE_AI_KEY=sk-proj-...
 
 # Uses gpt-4o-mini by default
 cadence analyze ./repo -o report.txt
-```
 
-### Use GPT-4 for Critical Code
-
-```bash
-export CADENCE_AI_KEY=sk-proj-...
+# Or use GPT-4 for critical code
 export CADENCE_AI_MODEL=gpt-4
-
 cadence analyze ./security-critical-code -o critical-report.txt
 ```
 
-### Use GPT-4-turbo for Balanced Performance
+### Anthropic (Default: claude-sonnet-4-20250514)
 
 ```bash
-export CADENCE_AI_KEY=sk-proj-...
-export CADENCE_AI_MODEL=gpt-4-turbo
+export CADENCE_AI_ENABLED=true
+export CADENCE_AI_PROVIDER=anthropic
+export CADENCE_AI_KEY=sk-ant-...
 
+# Uses claude-sonnet-4-20250514 by default
 cadence analyze ./repo -o report.txt
 ```
 
@@ -68,39 +66,16 @@ cadence analyze ./repo -o report.txt
 export CADENCE_AI_ENABLED=true
 export CADENCE_AI_KEY=sk-proj-...
 
-cadence analyze ./repo -o report.json
-```
-
-Example output includes AI analysis:
-
-```json
-{
-  "suspicious_commits": [
-    {
-      "hash": "abc123def",
-      "author": "user@example.com",
-      "timestamp": "2024-01-15T10:30:00Z",
-      "additions": 450,
-      "deletions": 50,
-      "flagged_by": ["suspicious_additions"],
-      "ai_analysis": {
-        "assessment": "likely AI-generated",
-        "confidence": 0.85,
-        "reasoning": "Code shows multiple AI indicators",
-        "indicators": ["generic_variable_names", "missing_error_handling"]
-      }
-    }
-  ]
-}
+cadence analyze ./repo -o report.json --config .cadence.yaml
 ```
 
 ### Text Report
 
 ```bash
-cadence analyze ./repo -o report.txt
+cadence analyze ./repo -o report.txt --config .cadence.yaml
 ```
 
-Includes AI findings for each flagged commit.
+Includes AI findings in the HIGH/MEDIUM/LOW SEVERITY sections for each flagged detection.
 
 ## Multiple Repositories
 
@@ -115,20 +90,19 @@ repos=("repo1" "repo2" "repo3")
 
 for repo in "${repos[@]}"; do
   echo "Analyzing $repo..."
-  cadence analyze "./$repo" -o "report-$repo.json"
+  cadence analyze "./$repo" -o "report-$repo.json" --config .cadence.yaml
 done
 ```
 
 ### Analyze Changed Files Only
 
 ```bash
-# Use git to find recently modified repos
 export CADENCE_AI_KEY=sk-proj-...
 
 for repo in $(find . -maxdepth 2 -name ".git" -type d); do
   repo_dir=$(dirname "$repo")
   echo "Analyzing $repo_dir..."
-  cadence analyze "$repo_dir" -o "report-$(basename $repo_dir).txt"
+  cadence analyze "$repo_dir" -o "report-$(basename $repo_dir).txt" --config .cadence.yaml
 done
 ```
 
@@ -156,19 +130,24 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version: '1.24'
 
       - name: Install Cadence
         run: go install github.com/TryCadence/Cadence/cmd/cadence@latest
 
+      - name: Create config
+        run: cadence config init
+
       - name: Run Cadence Analysis
         env:
           CADENCE_AI_ENABLED: true
-          CADENCE_AI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CADENCE_AI_PROVIDER: openai  # or "anthropic"
+          CADENCE_AI_KEY: ${{ secrets.CADENCE_AI_KEY }}
           CADENCE_AI_MODEL: gpt-4o-mini
         run: |
           cadence analyze . \
             --output report.json \
+            --config .cadence.yaml \
             --suspicious-additions 500 \
             --max-additions-pm 100
 
@@ -176,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: cadence-report
-          path: report.json
+          path: reports/report.json
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
@@ -184,13 +163,12 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('report.json', 'utf8'));
-            const suspicious = report.suspicious_commits.length;
+            const report = JSON.parse(fs.readFileSync('reports/report.json', 'utf8'));
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🔍 Cadence Analysis: Found ${suspicious} suspicious commits`
+              body: `🔍 Cadence Analysis: Score ${report.overallScore.toFixed(1)} — ${report.assessment}`
             });
 ```
 
@@ -198,20 +176,21 @@ jobs:
 
 ```yaml
 cadence_analysis:
-  image: golang:1.21
+  image: golang:1.24
   script:
     - go install github.com/TryCadence/Cadence/cmd/cadence@latest
-    - cadence analyze ./src --output report.json
+    - cadence analyze ./src --output report.json --config .cadence.yaml
   artifacts:
     paths:
-      - report.json
+      - reports/report.json
     expire_in: 30 days
   only:
     - merge_requests
     - main
   variables:
     CADENCE_AI_ENABLED: "true"
-    CADENCE_AI_KEY: $OPENAI_API_KEY
+    CADENCE_AI_PROVIDER: "openai"  # or "anthropic"
+    CADENCE_AI_KEY: $CADENCE_AI_KEY
 ```
 
 ## Webhook Integration
@@ -222,17 +201,15 @@ cadence_analysis:
 # Start webhook server with AI enabled
 export CADENCE_AI_ENABLED=true
 export CADENCE_AI_KEY=sk-proj-...
-export CADENCE_WEBHOOK_ENABLED=true
-export CADENCE_WEBHOOK_PORT=3000
 
-cadence webhook
+cadence webhook --port 8000 --secret your-webhook-secret
 ```
 
-The webhook will automatically use AI analysis for all received webhooks.
+The webhook server automatically applies AI analysis to all received push events when AI is enabled. Results are also available via SSE streaming at `/api/stream/repository` and `/api/stream/website`.
 
 ## Configuration Files
 
-### cadence.yml with AI
+### .cadence.yaml with AI
 
 ```yaml
 thresholds:
@@ -244,13 +221,12 @@ thresholds:
 
 ai:
   enabled: true
-  provider: openai
-  api_key: "${CADENCE_AI_KEY}"
-  model: gpt-4-turbo
+  provider: "openai"            # or "anthropic"
+  model: ""                     # Leave empty for provider default
 
 webhook:
   enabled: true
-  port: 3000
+  port: 8000
   secret: your-webhook-secret
 ```
 
@@ -258,10 +234,8 @@ webhook:
 
 ```bash
 export CADENCE_AI_KEY=sk-proj-...
-cadence analyze ./repo -o report.json
+cadence analyze ./repo -o report.json --config .cadence.yaml
 ```
-
-Automatically loads `cadence.yml` from current directory.
 
 ## Cost-Effective Workflows
 
@@ -276,25 +250,25 @@ export CADENCE_AI_KEY=sk-proj-...
 # Phase 1: Quick scan with cheaper model
 echo "Phase 1: Quick scan..."
 export CADENCE_AI_MODEL=gpt-4o-mini
-cadence analyze ./repo --output quick-scan.json
+cadence analyze ./repo --output quick-scan.json --config .cadence.yaml
 
 # Phase 2: Deep dive on flagged areas with better model
 echo "Phase 2: Deep analysis..."
 export CADENCE_AI_MODEL=gpt-4
-cadence analyze ./flagged-sections --output detailed-scan.json
+cadence analyze ./flagged-sections --output detailed-scan.json --config .cadence.yaml
 ```
 
 ### Disable AI for Known-Good Code
 
 ```bash
-# Skip analysis on vendor/dependencies
+# Skip AI on vendor/dependencies
 export CADENCE_AI_ENABLED=false
-cadence analyze ./node_modules -o report.txt
+cadence analyze ./node_modules -o report.txt --config .cadence.yaml
 
 # Enable for source code
 export CADENCE_AI_ENABLED=true
 export CADENCE_AI_KEY=sk-proj-...
-cadence analyze ./src -o report.txt
+cadence analyze ./src -o report.txt --config .cadence.yaml
 ```
 
 ## Troubleshooting
@@ -302,18 +276,15 @@ cadence analyze ./src -o report.txt
 ### Verify Configuration
 
 ```bash
-# Check if key is set
+# Check if keys are set
 echo $CADENCE_AI_KEY
-
-# Verify model availability
-curl -s https://api.openai.com/v1/models \
-  -H "Authorization: Bearer $CADENCE_AI_KEY" | head -20
+echo $CADENCE_AI_PROVIDER
 ```
 
 ### Test API Connection
 
 ```bash
-# Simple API test
+# OpenAI test
 curl -X POST https://api.openai.com/v1/chat/completions \
   -H "Authorization: Bearer $CADENCE_AI_KEY" \
   -H "Content-Type: application/json" \
@@ -322,20 +293,30 @@ curl -X POST https://api.openai.com/v1/chat/completions \
     "messages": [{"role": "user", "content": "Hello"}],
     "max_tokens": 10
   }' | jq .
+
+# Anthropic test
+curl -X POST https://api.anthropic.com/v1/messages \
+  -H "x-api-key: $CADENCE_AI_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 10,
+    "messages": [{"role": "user", "content": "Hello"}]
+  }' | jq .
 ```
 
 ### Handle Rate Limiting
 
 ```bash
 #!/bin/bash
-# Retry with backoff
 retry_with_backoff() {
   local max_attempts=3
   local timeout=1
   local attempt=1
 
   while [ $attempt -le $max_attempts ]; do
-    if cadence analyze ./repo -o report.json 2>/dev/null; then
+    if cadence analyze ./repo -o report.json --config .cadence.yaml 2>/dev/null; then
       return 0
     fi
     echo "Attempt $attempt failed, retrying in ${timeout}s..."
@@ -352,7 +333,7 @@ retry_with_backoff
 
 ## Next Steps
 
-- [Configure AI](/docs/ai/configuration)
-- [View detection strategies](/docs/cli/detection-strategies)
+- [AI Configuration](/docs/integrations/ai-providers/configuration)
+- [CLI overview](/docs/cli)
 - [Set up webhooks](/docs/integrations/webhooks)
 - [Read CLI commands](/docs/cli/commands)

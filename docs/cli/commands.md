@@ -105,7 +105,13 @@ cadence analyze /path/to/repo \
 
 ### Output
 
-The command creates a report in the `reports/` directory. Reports are automatically formatted based on file extension:
+The command creates a report in the `reports/` directory. The format is detected from the output file extension:
+
+- `.json` — JSON format
+- `.txt` or `.text` — Human-readable text format
+- No extension — Defaults to text format
+
+> [!NOTE] The `analyze` command currently detects format from the file extension. Only `.json` and `.txt` are supported. The webhook server and API support all 5 formats (JSON, text, HTML, YAML, BSON).
 
 **JSON output** contains:
 - Flagged commits with suspicion scores
@@ -122,10 +128,10 @@ The command creates a report in the `reports/` directory. Reports are automatica
 ### How It Works
 
 1. **Repository loading** - Reads Git history and commit metadata
-2. **Analysis** - Applies 13+ detection strategies to each commit
+2. **Analysis** - Applies 18 detection strategies to each commit
 3. **Scoring** - Combines strategy results into suspicion scores
 4. **Detection** - Flags commits exceeding configured thresholds
-5. **AI validation** (optional) - OpenAI validation if enabled in config
+5. **AI validation** (optional) - OpenAI or Anthropic validation if enabled in config
 6. **Reporting** - Generates formatted report with findings
 
 ## web - Website Content Analysis
@@ -207,8 +213,8 @@ cadence web https://example.com \
 1. **Fetching** - Downloads page HTML with proper HTTP headers
 2. **Extraction** - Parses HTML and extracts meaningful content (body text, headings, metadata)
 3. **Filtering** - Removes navigation, boilerplate, code blocks
-4. **Analysis** - Examines text for 7+ AI-generation patterns
-5. **AI validation** (optional) - Uses OpenAI to provide expert analysis
+4. **Analysis** - Examines text for 20 AI-generation patterns
+5. **AI validation** (optional) - Uses configured AI provider (OpenAI or Anthropic) for analysis
 6. **Reporting** - Generates formatted report with findings
 
 ## config - Configuration Management
@@ -265,26 +271,56 @@ thresholds:
   
   # RATIO-BASED DETECTION
   max_addition_ratio: 0.95
+  min_deletion_ratio: 0.95
+  min_commit_size_ratio: 100
+  
+  # PRECISION ANALYSIS
+  enable_precision_analysis: true
 
 # Exclude specific files from analysis
 exclude_files:
   - package-lock.json
   - yarn.lock
-  - "*.log"
+  - "*.min.js"
+  - "*.min.css"
+  - "node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - "vendor/**"
+  - ".git/**"
+  - "*.png"
+  - "*.jpg"
+  - "*.svg"
+  - "*.woff"
+  - "*.woff2"
 
 # Optional: AI analysis configuration
 ai:
   enabled: false
-  provider: openai
-  model: gpt-4o-mini
-  api_key: "${OPENAI_API_KEY}"
+  provider: "openai"     # or "anthropic"
+  model: ""              # Leave empty for provider default
+  api_key: ""            # Or set CADENCE_AI_API_KEY env var
 
 # Optional: Webhook configuration
 webhook:
-  port: 3000
+  port: 8000
   host: 0.0.0.0
   secret: "${CADENCE_WEBHOOK_SECRET}"
   max_workers: 4
+  read_timeout: 30
+  write_timeout: 30
+
+# Optional: Strategy toggles (all enabled by default)
+strategies:
+  # commit_message_analysis: true
+  # naming_pattern_analysis: true
+  # structural_consistency: true
+  # burst_pattern: true
+  # error_handling_pattern: true
+  # template_pattern: true
+  # file_extension_pattern: true
+  # statistical_anomaly: true
+  # timing_anomaly: true
 ```
 
 ### Usage Workflow
@@ -298,8 +334,10 @@ webhook:
 
 3. **Use in analysis:**
    ```bash
-   cadence analyze /path/to/repo --config cadence.yml --output report.json
+   cadence analyze /path/to/repo --config .cadence.yaml --output report.json
    ```
+
+> [!NOTE] The `config init` command creates `.cadence.yaml`, but the auto-detection in `analyze` and `web` looks for `cadence.yml` in the current directory. If you want auto-detection without `--config`, rename the file: `mv .cadence.yaml cadence.yml`
 
 ### Configuration Examples
 
@@ -325,9 +363,8 @@ thresholds:
 ```yaml
 ai:
   enabled: true
-  provider: openai
-  model: gpt-4o-mini
-  api_key: "${OPENAI_API_KEY}"
+  provider: "openai"            # or "anthropic"
+  # Set CADENCE_AI_KEY env var
 ```
 
 ## webhook - Webhook Server
@@ -343,7 +380,7 @@ cadence webhook [flags]
 ### Flags
 
 ```bash
--p, --port int           Webhook server port (default: 3000)
+-p, --port int           Webhook server port (default: 8000)
     --host string        Host to listen on (default: 0.0.0.0)
     --secret string      Webhook secret for signature verification (required)
     --workers int        Number of concurrent workers (default: 4)
@@ -354,7 +391,7 @@ cadence webhook [flags]
 
 ### Examples
 
-**Start webhook server (default port 3000):**
+**Start webhook server (default port 8000):**
 ```bash
 cadence webhook --secret "your-webhook-secret"
 ```
@@ -422,9 +459,7 @@ cadence version
 ### Output
 
 ```
-Cadence version v2.1.0
-Git Commit: abc123def456
-Build Time: 2024-01-15T10:30:00Z
+Cadence v0.3.0 (abc123de) built at 2026-02-12T10:30:00Z
 ```
 
 ## help - Command Help
@@ -448,8 +483,9 @@ These flags work with any command:
 ```bash
 --config string   Path to configuration file (looks for cadence.yml in current directory)
 -h, --help        Show help for command
---version         Show version information
 ```
+
+> [!NOTE] Use `cadence version` to see version information. There is no `--version` global flag.
 
 ## Exit Codes
 
@@ -460,19 +496,27 @@ These flags work with any command:
 
 ## Environment Variables
 
-Configure Cadence via environment variables (overridden by CLI flags):
+Cadence uses the `CADENCE_` prefix with viper's automatic env binding. Environment variables map to config keys with dots replaced by underscores:
 
 ```bash
-# Configuration file location
-CADENCE_CONFIG=/path/to/cadence.yml
-
 # AI provider credentials
-OPENAI_API_KEY=sk-...
+CADENCE_AI_API_KEY=sk-...              # maps to ai.api_key
+CADENCE_AI_PROVIDER=openai             # maps to ai.provider (or "anthropic")
+CADENCE_AI_ENABLED=true                # maps to ai.enabled
+CADENCE_AI_MODEL=gpt-4o-mini           # maps to ai.model
 
 # Webhook settings
-CADENCE_WEBHOOK_PORT=8080
-CADENCE_WEBHOOK_SECRET=webhook-secret
+CADENCE_WEBHOOK_PORT=8080              # maps to webhook.port
+CADENCE_WEBHOOK_SECRET=webhook-secret  # maps to webhook.secret
+CADENCE_WEBHOOK_HOST=0.0.0.0           # maps to webhook.host
+CADENCE_WEBHOOK_MAX_WORKERS=8          # maps to webhook.max_workers
+
+# Threshold overrides
+CADENCE_THRESHOLDS_SUSPICIOUS_ADDITIONS=300
+CADENCE_THRESHOLDS_MAX_ADDITIONS_PER_MIN=50
 ```
+
+> [!NOTE] There is no `CADENCE_CONFIG` environment variable. Use `--config` flag to specify a config file path.
 
 ## Common Workflows
 
@@ -547,13 +591,16 @@ done
 Create different configs for different scenarios:
 
 ```bash
-# Strict analysis
-cadence config init --output cadence-strict.yml
-# Edit to lower thresholds
+# Generate default config
+cadence config init
+# This creates .cadence.yaml in the current directory
 
-# Quick analysis
-cadence config init --output cadence-fast.yml
-# Edit to higher thresholds
+# Copy and customize for different scenarios
+cp .cadence.yaml cadence-strict.yml
+# Edit cadence-strict.yml to lower thresholds
+
+cp .cadence.yaml cadence-fast.yml
+# Edit cadence-fast.yml to raise thresholds
 
 # Use as needed
 cadence analyze /repo --config cadence-strict.yml -o strict.json
@@ -563,11 +610,14 @@ cadence analyze /repo --config cadence-fast.yml -o fast.json
 ### Filter JSON Results
 
 ```bash
-# Extract just the flagged commits
-cadence analyze /repo -o - --json | jq '.suspicious_commits'
+# Analyze and save as JSON
+cadence analyze /repo -o report.json
+
+# Then filter with jq
+jq '.suspicious_commits' reports/report.json
 
 # Count flagged commits
-cadence analyze /repo -o - --json | jq '.suspicious_commits | length'
+jq '.suspicious_commits | length' reports/report.json
 ```
 
 ### Scheduled Analysis
@@ -617,7 +667,7 @@ chmod +x ./bin/cadence
 
 ### Webhook Not Receiving Events
 
-1. Check firewall allows port (default 3000)
+1. Check firewall allows port (default 8000)
 2. Verify webhook secret matches GitHub configuration
 3. Check server logs for connection issues
 4. Ensure public URL is accessible from GitHub
@@ -626,4 +676,4 @@ chmod +x ./bin/cadence
 
 - [Detection Strategies](/docs/cli/detection-strategies) - Learn how each strategy works
 - [Repository Analysis](/docs/analysis/repository) - Real-world analysis examples
-- [Configuration Guide](/docs/configuration) - Advanced settings
+- [Configuration Guide](/docs/getting-started/configuration) - Advanced settings

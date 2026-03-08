@@ -84,11 +84,4 @@
   
   <!-- URL -->
   <text x="80" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" fill-opacity="0.4">noslop.tech</text>
-  
-  <!-- Version badge -->
-  <g transform="translate(1040, 530)">
-    <rect width="80" height="36" rx="18" fill="white" fill-opacity="0.05" stroke="white" stroke-opacity="0.1"/>
-    <circle cx="22" cy="18" r="5" fill="#22c55e"/>
-    <text x="36" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="white" fill-opacity="0.8">v2.1</text>
-  </g>
 </svg>

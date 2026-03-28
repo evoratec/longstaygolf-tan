@@ -16,6 +16,7 @@ export const Route = createRootRoute({
 	head: () => ({
 		meta: [
 			// Essential metadata
+
 			{
 				charSet: "utf-8",
 			},
@@ -147,8 +148,8 @@ export const Route = createRootRoute({
 			// Robots and crawlers
 			{
 				name: "robots",
-				content:
-					"index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+				content: "noindex, nofollow",
+			//	content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 			},
 			{
 				name: "googlebot",

@@ -26,7 +26,7 @@ export function Hero() {
 				{/* Title */}
 				<h1 className="text-6xl md:text-8xl font-bold text-white mb-6 tracking-tight">
 					<span className="bg-linear-to-b from-white to-white/70 bg-clip-text text-transparent">
-						Cadence
+						Long Stay Golf
 					</span>
 				</h1>
 

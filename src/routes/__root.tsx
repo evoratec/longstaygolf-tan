@@ -282,12 +282,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					}}
 				/>
 				{/* Ackee Analytics */}
-				<script
-					async
-					src="https://ackee.bytebrush.dev/tracker.js"
-					data-ackee-server="https://ackee.bytebrush.dev"
-					data-ackee-domain-id="c33b67dd-b573-4dcf-95a8-cf444abca842"
-				/>
+
 			</head>
 			<body>
 				{children}

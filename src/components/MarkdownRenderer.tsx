@@ -29,7 +29,7 @@ import {
 	SiPython,
 	SiRust,
 	SiDocker,
-	SiCss3,
+
 	SiHtml5,
 	SiToml,
 	SiGraphql,
@@ -68,7 +68,7 @@ const LANG_ICONS: Record<string, React.ReactNode> = {
 	jsx: <SiJavascript className="w-3 h-3" />,
 	powershell: <VscTerminalPowershell className="w-3.5 h-3.5" />,
 	ps1: <VscTerminalPowershell className="w-3.5 h-3.5" />,
-	css: <SiCss3 className="w-3.5 h-3.5" />,
+
 	html: <SiHtml5 className="w-3.5 h-3.5" />,
 	toml: <SiToml className="w-3.5 h-3.5" />,
 	sql: <TbSql className="w-3.5 h-3.5" />,

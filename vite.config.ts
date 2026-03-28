@@ -5,12 +5,13 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import viteTsConfigPaths from "vite-tsconfig-paths";
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 const config = defineConfig(({ mode }) => ({
 	server: {
-		port: 39249,
-		host: "0.0.0.0",
-		allowedHosts: ["noslop.tech"],
+		port: 3000,
+		host: true,
+		preset: 'node-server',
 	},
 	plugins: [
 		devtools(),
@@ -28,6 +29,7 @@ const config = defineConfig(({ mode }) => ({
 		tailwindcss(),
 		tanstackStart(),
 		viteReact(),
+		tsconfigPaths(),
 	],
 }));
 

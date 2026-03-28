@@ -28,7 +28,7 @@ export function LogoType() {
 	return (
 		<div className="flex items-center gap-2">
 			<LogoIcon size={28} />
-			<span className="text-xl font-bold tracking-tight">Cadence</span>
+			<span className="text-xl font-bold tracking-tight">Long Stay Golf</span>
 		</div>
 	);
 }

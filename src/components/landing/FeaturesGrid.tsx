@@ -57,7 +57,7 @@ export function FeaturesGrid() {
 						Features
 					</h2>
 					<p className="text-base text-white/50 max-w-xl mx-auto">
-						Tools for detecting AI-generated content in code and text
+						Herramientas for detecting AI-generated content in code and text
 					</p>
 				</div>
 
